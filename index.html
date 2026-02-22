@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NEXORA v5.1 FIXED - 2026-02-22 14:28 -->
+<!-- NEXORA v5.2 - ШАГ 1 - 2026-02-22 -->
 <html lang="ru">
 <head>
 <meta charset="UTF-8"/>
@@ -442,10 +442,10 @@ textarea.input{resize:vertical;min-height:80px}
       <!-- REG FORM -->
       <div id="reg-form" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
         <div style="font-size:14px;font-weight:700;margin-bottom:14px;font-family:var(--font-display)">Регистрация</div>
-        <div class="g2"><div class="ig"><label>Имя</label><input class="input" placeholder="Иван"/></div><div class="ig"><label>Фамилия</label><input class="input" placeholder="Петров"/></div></div>
-        <div class="ig"><label>Компания</label><input class="input" placeholder="Nexora Corp"/></div>
-        <div class="ig"><label>Должность</label><input class="input" placeholder="CEO"/></div>
-        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doLogin('participant')">Создать аккаунт</button>
+        <div class="g2"><div class="ig"><label>Имя</label><input class="input" id="reg-first" placeholder="Иван"/></div><div class="ig"><label>Фамилия</label><input class="input" id="reg-last" placeholder="Петров"/></div></div>
+        <div class="ig"><label>Компания</label><input class="input" id="reg-company" placeholder="Nexora Corp"/></div>
+        <div class="ig"><label>Должность</label><input class="input" id="reg-job" placeholder="CEO"/></div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doRegister()">Создать аккаунт</button>
       </div>
     </div>
   </div>
@@ -482,7 +482,7 @@ textarea.input{resize:vertical;min-height:80px}
       </div>
       <span class="t-role participant">Участник</span>
       <div style="position:relative">
-        <div class="t-avatar" onclick="toggleAvatarMenu('p-av-dd')">ИП</div>
+        <div class="t-avatar" onclick="toggleAvatarMenu('p-av-dd')" id="p-avatar-initials">ИП</div>
         <div class="avatar-dropdown" id="p-av-dd">
           <div class="av-item" onclick="partTab('profile','Профиль');closeDropdowns()">👤 Мой профиль</div>
           <div class="av-item" onclick="partTab('myqr','Мой QR-код');closeDropdowns()">⬚ Мой QR-код</div>
@@ -720,18 +720,18 @@ textarea.input{resize:vertical;min-height:80px}
                 <div class="photo-upload-icon">📷</div>
               </div>
               <div style="flex:1">
-                <div style="font-size:16px;font-weight:700;font-family:var(--font-display)">Иван Петров</div>
-                <div style="font-size:13px;color:var(--text-muted)">Nexora Corp · CEO</div>
-                <div style="font-size:12px;color:var(--text-dim);font-family:var(--mono);margin-top:2px">Москва</div>
+                <div style="font-size:16px;font-weight:700;font-family:var(--font-display)" id="prof-preview-name">—</div>
+                <div style="font-size:13px;color:var(--text-muted)" id="prof-preview-company">—</div>
+                <div style="font-size:12px;color:var(--text-dim);font-family:var(--mono);margin-top:2px" id="prof-preview-city">—</div>
               </div>
             </div>
             <div class="g2">
-              <div class="ig"><label>Имя</label><input class="input" value="Иван"/></div>
-              <div class="ig"><label>Фамилия</label><input class="input" value="Петров"/></div>
+              <div class="ig"><label>Имя</label><input class="input" id="prof-first" value=""/></div>
+              <div class="ig"><label>Фамилия</label><input class="input" id="prof-last" value=""/></div>
             </div>
-            <div class="ig"><label>Город</label><input class="input" value="Москва" placeholder="Москва"/></div>
-            <div class="ig"><label>Компания</label><input class="input" value="Nexora Corp"/></div>
-            <div class="ig"><label>Должность</label><input class="input" value="CEO"/></div>
+            <div class="ig"><label>Город</label><input class="input" id="prof-city" placeholder="Москва"/></div>
+            <div class="ig"><label>Компания</label><input class="input" id="prof-company"/></div>
+            <div class="ig"><label>Должность</label><input class="input" id="prof-job"/></div>
             <div class="ig">
               <label>Интересы <span style="color:var(--text-dim);font-weight:400">(используются для рекомендаций)</span></label>
               <div class="tag-list" id="interests-list">
@@ -741,7 +741,7 @@ textarea.input{resize:vertical;min-height:80px}
                 <input class="tag-input" placeholder="+ Добавить" onkeydown="addInterest(event,this)"/>
               </div>
             </div>
-            <button class="btn btn-primary btn-sm" onclick="toast('Профиль сохранён','success')">Сохранить изменения</button>
+            <button class="btn btn-primary btn-sm" onclick="saveProfile()">Сохранить изменения</button>
           </div>
         </div>
         <div>
@@ -1325,15 +1325,12 @@ async function doLogin(forcedRole) {
 
   if (!email) { toast('Введите email', 'error'); return; }
 
-  // Показываем загрузку
   const btn = document.querySelector('#screen-auth .btn-primary');
   if (btn) { btn.disabled = true; btn.textContent = 'Входим...'; }
 
   try {
-    // Пробуем войти
     let { data, error } = await db.auth.signInWithPassword({ email, password });
 
-    // Если пользователь не существует — регистрируем
     if (error && error.message.includes('Invalid login credentials')) {
       const reg = await db.auth.signUp({ email, password: password || 'nexora2025' });
       if (reg.error) throw reg.error;
@@ -1344,11 +1341,7 @@ async function doLogin(forcedRole) {
     }
 
     STATE.currentUser = data.user;
-
-    // Ждём немного чтобы триггер создал профиль
     await new Promise(r => setTimeout(r, 600));
-
-    // Загружаем профиль
     const profile = await loadMyProfile();
     STATE.currentProfile = profile;
 
@@ -1367,6 +1360,8 @@ async function doLogin(forcedRole) {
 }
 
 function navigateByRole(role) {
+  // Fill profile form with real data
+  if (STATE.currentProfile) fillProfileForm(STATE.currentProfile);
   if (role === 'organizer') { goTo('organizer'); orgTab('dashboard','Dashboard'); }
   else if (role === 'admin') { goTo('admin'); adminTab('events','All Events'); }
   else { goTo('participant'); partTab('events','Мероприятия'); loadParticipantData(); }
@@ -1374,6 +1369,92 @@ function navigateByRole(role) {
 
 function showRegForm() {
   document.getElementById('reg-form').style.display = 'block';
+}
+
+// ─── РЕГИСТРАЦИЯ с сохранением полей ───
+async function doRegister() {
+  const email = document.getElementById('auth-email').value.trim();
+  const passwordEl = document.querySelector('#screen-auth input[type=password]');
+  const password = passwordEl?.value || 'nexora2025';
+  const firstName = document.getElementById('reg-first')?.value.trim() || '';
+  const lastName  = document.getElementById('reg-last')?.value.trim() || '';
+  const company   = document.getElementById('reg-company')?.value.trim() || '';
+  const jobTitle  = document.getElementById('reg-job')?.value.trim() || '';
+
+  if (!email) { toast('Введите email', 'error'); return; }
+
+  const btn = document.querySelector('#reg-form .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = 'Создаём...'; }
+
+  try {
+    const { data, error } = await db.auth.signUp({ email, password });
+    if (error) throw error;
+
+    STATE.currentUser = data.user;
+
+    // Ждём триггер
+    await new Promise(r => setTimeout(r, 800));
+
+    // Сохраняем поля профиля
+    if (data.user) {
+      await db.from('users').update({
+        first_name: firstName,
+        last_name: lastName,
+        company: company,
+        job_title: jobTitle,
+        updated_at: new Date().toISOString()
+      }).eq('id', data.user.id);
+    }
+
+    const profile = await loadMyProfile();
+    STATE.currentProfile = profile;
+    fillProfileForm(profile);
+    navigateByRole(profile?.role || 'participant');
+    toast('Аккаунт создан!', 'success');
+
+  } catch (err) {
+    toast(err.message || 'Ошибка регистрации', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Создать аккаунт'; }
+  }
+}
+
+// ─── ЗАПОЛНИТЬ ФОРМУ ПРОФИЛЯ из данных БД ───
+function fillProfileForm(profile) {
+  if (!profile) return;
+
+  // Поля формы
+  const f = document.getElementById('prof-first');   if (f) f.value = profile.first_name || '';
+  const l = document.getElementById('prof-last');    if (l) l.value = profile.last_name || '';
+  const c = document.getElementById('prof-city');    if (c) c.value = profile.city || '';
+  const co = document.getElementById('prof-company'); if (co) co.value = profile.company || '';
+  const j = document.getElementById('prof-job');     if (j) j.value = profile.job_title || '';
+
+  // Превью имени
+  const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || profile.email || '—';
+  const pn = document.getElementById('prof-preview-name');    if (pn) pn.textContent = fullName;
+  const pc = document.getElementById('prof-preview-company'); if (pc) pc.textContent = [profile.company, profile.job_title].filter(Boolean).join(' · ') || '—';
+  const pci = document.getElementById('prof-preview-city');   if (pci) pci.textContent = profile.city || '—';
+
+  // Инициалы в аватаре топбара
+  const initials = ((profile.first_name||'?')[0] + (profile.last_name||'?')[0]).toUpperCase();
+  const av = document.getElementById('p-avatar-initials'); if (av) av.textContent = initials;
+
+  // Интересы
+  const interestsList = document.getElementById('interests-list');
+  if (interestsList && profile.interests?.length) {
+    // Убираем старые теги, оставляем input
+    const inp = interestsList.querySelector('.tag-input');
+    interestsList.innerHTML = '';
+    profile.interests.forEach(tag => {
+      const span = document.createElement('span');
+      span.className = 'tag removable';
+      span.textContent = tag + ' ✕';
+      span.onclick = function() { removeInterest(this); };
+      interestsList.appendChild(span);
+    });
+    if (inp) interestsList.appendChild(inp);
+  }
 }
 
 // Загрузить свой профиль
@@ -1385,21 +1466,28 @@ async function loadMyProfile() {
 
 // Сохранить профиль
 async function saveProfile() {
-  if (!STATE.currentUser) return;
+  if (!STATE.currentUser) { toast('Необходима авторизация', 'error'); return; }
   const interests = Array.from(document.querySelectorAll('#interests-list .tag'))
     .map(t => t.textContent.replace(' ✕','').trim())
     .filter(Boolean);
   const { error } = await db.from('users').update({
-    first_name: document.querySelector('#part-profile input[placeholder="Иван"]')?.value,
-    last_name: document.querySelector('#part-profile input[placeholder="Петров"]')?.value,
-    city: document.querySelector('#part-profile input[placeholder="Москва"]')?.value,
-    company: document.querySelector('#part-profile input[value="Nexora Corp"]')?.value,
-    job_title: document.querySelector('#part-profile input[value="CEO"]')?.value,
+    first_name: document.getElementById('prof-first')?.value || null,
+    last_name:  document.getElementById('prof-last')?.value || null,
+    city:       document.getElementById('prof-city')?.value || null,
+    company:    document.getElementById('prof-company')?.value || null,
+    job_title:  document.getElementById('prof-job')?.value || null,
     interests,
     updated_at: new Date().toISOString()
   }).eq('id', STATE.currentUser.id);
-  if (!error) toast('Профиль сохранён', 'success');
-  else toast('Ошибка сохранения', 'error');
+
+  if (!error) {
+    const profile = await loadMyProfile();
+    STATE.currentProfile = profile;
+    fillProfileForm(profile);
+    toast('Профиль сохранён', 'success');
+  } else {
+    toast('Ошибка сохранения: ' + error.message, 'error');
+  }
 }
 
 // ─── LOAD PARTICIPANT DATA ───
@@ -2007,6 +2095,7 @@ renderRegs();
     STATE.currentUser = session.user;
     const profile = await loadMyProfile();
     STATE.currentProfile = profile;
+    fillProfileForm(profile);
     navigateByRole(profile?.role || 'participant');
   }
 })();
