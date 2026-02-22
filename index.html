@@ -486,7 +486,7 @@ textarea.input{resize:vertical;min-height:80px}
           <div class="av-item" onclick="partTab('profile','Профиль');closeDropdowns()">👤 Мой профиль</div>
           <div class="av-item" onclick="partTab('myqr','Мой QR-код');closeDropdowns()">⬚ Мой QR-код</div>
           <div class="divider" style="margin:4px 0"></div>
-          <div class="av-item danger" onclick="goTo('auth')">→ Выйти</div>
+          <div class="av-item danger" onclick="db.auth.signOut().then(()=>goTo('auth'))">→ Выйти</div>
         </div>
       </div>
     </div>
@@ -593,11 +593,15 @@ textarea.input{resize:vertical;min-height:80px}
       </div>
       <!-- PROGRAM -->
       <div id="ev-program" class="tab-content">
-        ${[['09:00','Регистрация и нетворкинг'],['10:00','Открытие. AI как инфраструктура бизнеса'],['11:00','Панель: Fintech 2025'],['12:30','Q&A сессия'],['13:00','Обед и нетворкинг'],['14:30','Workshops: AI в продукте'],['16:30','Питч-сессия стартапов'],['17:30','Закрытый нетворкинг'],['19:00','Завершение']].map(([t,e])=>`
-        <div style="display:flex;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)">
-          <span style="font-family:var(--mono);font-size:12px;color:var(--text-dim);flex-shrink:0;width:44px">${t}</span>
-          <span style="font-size:13px;color:var(--text-muted)">${e}</span>
-        </div>`).join('')}
+        <div style="display:flex;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--font-mono);font-size:12px;color:var(--text-dim);flex-shrink:0;width:44px">09:00</span><span style="font-size:13px;color:var(--text-muted)">Регистрация и нетворкинг</span></div>
+        <div style="display:flex;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--font-mono);font-size:12px;color:var(--text-dim);flex-shrink:0;width:44px">10:00</span><span style="font-size:13px;color:var(--text-muted)">Открытие. AI как инфраструктура бизнеса</span></div>
+        <div style="display:flex;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--font-mono);font-size:12px;color:var(--text-dim);flex-shrink:0;width:44px">11:00</span><span style="font-size:13px;color:var(--text-muted)">Панель: Fintech 2025</span></div>
+        <div style="display:flex;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--font-mono);font-size:12px;color:var(--text-dim);flex-shrink:0;width:44px">12:30</span><span style="font-size:13px;color:var(--text-muted)">Q&amp;A сессия</span></div>
+        <div style="display:flex;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--font-mono);font-size:12px;color:var(--text-dim);flex-shrink:0;width:44px">13:00</span><span style="font-size:13px;color:var(--text-muted)">Обед и нетворкинг</span></div>
+        <div style="display:flex;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--font-mono);font-size:12px;color:var(--text-dim);flex-shrink:0;width:44px">14:30</span><span style="font-size:13px;color:var(--text-muted)">Workshops: AI в продукте</span></div>
+        <div style="display:flex;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--font-mono);font-size:12px;color:var(--text-dim);flex-shrink:0;width:44px">16:30</span><span style="font-size:13px;color:var(--text-muted)">Питч-сессия стартапов</span></div>
+        <div style="display:flex;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--font-mono);font-size:12px;color:var(--text-dim);flex-shrink:0;width:44px">17:30</span><span style="font-size:13px;color:var(--text-muted)">Закрытый нетворкинг</span></div>
+        <div style="display:flex;gap:16px;padding:10px 0;"><span style="font-family:var(--font-mono);font-size:12px;color:var(--text-dim);flex-shrink:0;width:44px">19:00</span><span style="font-size:13px;color:var(--text-muted)">Завершение</span></div>
       </div>
     </div>
 
@@ -638,30 +642,21 @@ textarea.input{resize:vertical;min-height:80px}
       <div class="g2" style="margin-bottom:20px">
         <div class="card">
           <div class="section-title">Связи по мероприятиям</div>
-          ${[['AI & Fintech Forum 2025',3,'var(--accent)'],['Fintech Winter 2024',0,'var(--text-dim)']].map(([ev,cnt,c])=>`
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)">
-            <span style="font-size:13px;color:var(--text-muted)">${ev}</span>
-            <span style="font-family:var(--mono);font-weight:700;font-size:15px;color:${c}">${cnt}</span>
-          </div>`).join('')}
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--text-muted)">AI &amp; Fintech Forum 2025</span><span style="font-family:var(--mono);font-weight:700;font-size:15px;color:var(--accent)">3</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--text-muted)">Fintech Winter 2024</span><span style="font-family:var(--mono);font-weight:700;font-size:15px;color:var(--text-dim)">0</span></div>
         </div>
         <div class="card">
           <div class="section-title">Активность за месяц</div>
-          <div class="bar-chart">
-            ${[0,1,0,2,1,0,0,3,1,0,2,0,1,0,0,1,0,2,0,1,0,0,0,1,2,0,1,3,2,4].map((h,i)=>`<div class="bar" style="height:${Math.max(h*16,3)}px;background:${h>0?'var(--accent)':'var(--surface3)'};border-radius:2px 2px 0 0"></div>`).join('')}
-          </div>
+          <div class="bar-chart" id="activity-bar-chart"></div>
           <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--text-dim);font-family:var(--mono)"><span>1 мар</span><span>15 мар</span><span>31 мар</span></div>
         </div>
       </div>
       <div class="card">
         <div class="section-title">Лента событий</div>
-        ${[['15 мар 10:18','Связь принята','Мария Кузнецова · Яндекс · Senior PM','AI & Fintech Forum 2025'],['15 мар 11:42','Связь принята','Ольга Смирнова · Ozon · CFO','AI & Fintech Forum 2025'],['16 мар','Запрос отправлен','Алексей Никитин · Сбер · Director','Ожидает подтверждения'],['20 мар','Связь принята','Дмитрий Волков · VK · CTO','AI & Fintech Forum 2025']].map(([d,a,p,ev])=>`
-        <div style="display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)">
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);flex-shrink:0;width:80px;padding-top:2px">${d}</div>
-          <div>
-            <div style="font-size:13px;font-weight:500">${p}</div>
-            <div style="font-size:11px;color:var(--text-dim);font-family:var(--mono)">${a} · ${ev}</div>
-          </div>
-        </div>`).join('')}
+        <div style="display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)"><div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);flex-shrink:0;width:80px;padding-top:2px">15 мар 10:18</div><div><div style="font-size:13px;font-weight:500">Мария Кузнецова · Яндекс · Senior PM</div><div style="font-size:11px;color:var(--text-dim);font-family:var(--mono)">Связь принята · AI &amp; Fintech Forum 2025</div></div></div>
+        <div style="display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)"><div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);flex-shrink:0;width:80px;padding-top:2px">15 мар 11:42</div><div><div style="font-size:13px;font-weight:500">Ольга Смирнова · Ozon · CFO</div><div style="font-size:11px;color:var(--text-dim);font-family:var(--mono)">Связь принята · AI &amp; Fintech Forum 2025</div></div></div>
+        <div style="display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)"><div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);flex-shrink:0;width:80px;padding-top:2px">16 мар</div><div><div style="font-size:13px;font-weight:500">Алексей Никитин · Сбер · Director</div><div style="font-size:11px;color:var(--text-dim);font-family:var(--mono)">Запрос отправлен · Ожидает подтверждения</div></div></div>
+        <div style="display:flex;gap:12px;padding:9px 0;"><div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);flex-shrink:0;width:80px;padding-top:2px">20 мар</div><div><div style="font-size:13px;font-weight:500">Дмитрий Волков · VK · CTO</div><div style="font-size:11px;color:var(--text-dim);font-family:var(--mono)">Связь принята · AI &amp; Fintech Forum 2025</div></div></div>
       </div>
     </div>
 
@@ -762,11 +757,9 @@ textarea.input{resize:vertical;min-height:80px}
           <!-- Activity timeline -->
           <div class="card">
             <div class="section-title">Activity Timeline</div>
-            ${[['Мар 2025','Участие в AI & Fintech Forum'],['Мар 2025','3 деловых связи создано'],['Апр 2025','Заявка на SaaS Summit']].map(([d,e])=>`
-            <div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
-              <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);flex-shrink:0;width:56px">${d}</span>
-              <span style="font-size:12px;color:var(--text-muted)">${e}</span>
-            </div>`).join('')}
+            <div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);flex-shrink:0;width:56px">Мар 2025</span><span style="font-size:12px;color:var(--text-muted)">Участие в AI &amp; Fintech Forum</span></div>
+            <div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);flex-shrink:0;width:56px">Мар 2025</span><span style="font-size:12px;color:var(--text-muted)">3 деловых связи создано</span></div>
+            <div style="display:flex;gap:10px;padding:7px 0;"><span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);flex-shrink:0;width:56px">Апр 2025</span><span style="font-size:12px;color:var(--text-muted)">Заявка на SaaS Summit</span></div>
           </div>
         </div>
       </div>
@@ -878,7 +871,7 @@ textarea.input{resize:vertical;min-height:80px}
       <div style="position:relative">
         <div class="t-avatar" onclick="toggleAvatarMenu('o-av-dd')">ЕК</div>
         <div class="avatar-dropdown" id="o-av-dd">
-          <div class="av-item danger" onclick="goTo('auth')">→ Выйти</div>
+          <div class="av-item danger" onclick="db.auth.signOut().then(()=>goTo('auth'))">→ Выйти</div>
         </div>
       </div>
     </div>
@@ -963,13 +956,7 @@ textarea.input{resize:vertical;min-height:80px}
         </div>
         <div class="card">
           <div class="section-title">Топ-5 по нетворкингу</div>
-          ${[['МК','Мария Кузнецова','Яндекс',12],['ОС','Ольга Смирнова','Ozon',9],['ДВ','Дмитрий Волков','VK',8],['АС','Анна Соколова','Сбер',7],['НК','Никита Козлов','Мегафон',6]].map(([av,n,c,cnt],i)=>`
-          <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
-            <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);width:16px">#${i+1}</span>
-            <div class="pc-av" style="width:26px;height:26px;font-size:10px">${av}</div>
-            <div style="flex:1"><div style="font-size:13px;font-weight:500">${n}</div><div style="font-size:11px;color:var(--text-muted)">${c}</div></div>
-            <span class="conn-pill">${cnt}</span>
-          </div>`).join('')}
+          <div id="org-top5-list"></div>
         </div>
       </div>
     </div>
@@ -1014,7 +1001,11 @@ textarea.input{resize:vertical;min-height:80px}
         <table style="width:100%;border-collapse:collapse">
           <thead><tr><th>Участник</th><th>Компания</th><th>Время</th><th>Статус</th></tr></thead>
           <tbody id="ci-tbody">
-            ${[['МК','Мария Кузнецова','Яндекс','09:14'],['ОС','Ольга Смирнова','Ozon','09:22'],['ИП','Игорь Петров','Т-Банк','09:31'],['АС','Анна Соколова','Сбер','09:38'],['НК','Никита Козлов','Мегафон','09:44']].map(([a,n,c,t])=>`<tr><td><strong>${n}</strong></td><td style="font-size:12px">${c}</td><td style="font-family:var(--mono);font-size:11px">${t}</td><td><span class="badge badge-checkedin">✓</span></td></tr>`).join('')}
+            <tr><td><strong>Мария Кузнецова</strong></td><td style="font-size:12px">Яндекс</td><td style="font-family:var(--mono);font-size:11px">09:14</td><td><span class="badge badge-checkedin">✓</span></td></tr>
+            <tr><td><strong>Ольга Смирнова</strong></td><td style="font-size:12px">Ozon</td><td style="font-family:var(--mono);font-size:11px">09:22</td><td><span class="badge badge-checkedin">✓</span></td></tr>
+            <tr><td><strong>Игорь Петров</strong></td><td style="font-size:12px">Т-Банк</td><td style="font-family:var(--mono);font-size:11px">09:31</td><td><span class="badge badge-checkedin">✓</span></td></tr>
+            <tr><td><strong>Анна Соколова</strong></td><td style="font-size:12px">Сбер</td><td style="font-family:var(--mono);font-size:11px">09:38</td><td><span class="badge badge-checkedin">✓</span></td></tr>
+            <tr><td><strong>Никита Козлов</strong></td><td style="font-size:12px">Мегафон</td><td style="font-family:var(--mono);font-size:11px">09:44</td><td><span class="badge badge-checkedin">✓</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -1032,13 +1023,16 @@ textarea.input{resize:vertical;min-height:80px}
       <div class="g2" style="margin-bottom:16px">
         <div class="card">
           <div class="section-title">Event-level Metrics</div>
-          ${[['Total Connections','89','var(--accent)'],['Connections / Attendee','0.63','var(--purple)'],['% Active Participants','67%','var(--green)'],['Accepted Rate','74%','var(--text)']].map(([l,v,c])=>`
-          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted);font-size:13px">${l}</span><span style="font-family:var(--mono);font-weight:700;color:${c};font-size:16px">${v}</span></div>`).join('')}
+          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted);font-size:13px">Total Connections</span><span style="font-family:var(--mono);font-weight:700;color:var(--accent);font-size:16px">89</span></div>
+          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted);font-size:13px">Connections / Attendee</span><span style="font-family:var(--mono);font-weight:700;color:var(--purple);font-size:16px">0.63</span></div>
+          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted);font-size:13px">% Active Participants</span><span style="font-family:var(--mono);font-weight:700;color:var(--green);font-size:16px">67%</span></div>
+          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted);font-size:13px">Accepted Rate</span><span style="font-family:var(--mono);font-weight:700;color:var(--text);font-size:16px">74%</span></div>
         </div>
         <div class="card">
           <div class="section-title">Post-Event Retention</div>
-          ${[['7-day connections','34','var(--accent)',38],['30-day connections','61','var(--green)',69],['Repeat connections','23%','var(--purple)',23]].map(([l,v,c,p])=>`
-          <div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span style="font-size:12px;color:var(--text-muted)">${l}</span><span style="font-family:var(--mono);font-weight:700;color:${c}">${v}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${p}%;background:${c}"></div></div></div>`).join('')}
+          <div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span style="font-size:12px;color:var(--text-muted)">7-day connections</span><span style="font-family:var(--mono);font-weight:700;color:var(--accent)">34</span></div><div class="progress-bar"><div class="progress-fill" style="width:38%;background:var(--accent)"></div></div></div>
+          <div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span style="font-size:12px;color:var(--text-muted)">30-day connections</span><span style="font-family:var(--mono);font-weight:700;color:var(--green)">61</span></div><div class="progress-bar"><div class="progress-fill" style="width:69%;background:var(--green)"></div></div></div>
+          <div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span style="font-size:12px;color:var(--text-muted)">Repeat connections</span><span style="font-family:var(--mono);font-weight:700;color:var(--purple)">23%</span></div><div class="progress-bar"><div class="progress-fill" style="width:23%;background:var(--purple)"></div></div></div>
         </div>
       </div>
       <div class="card">
@@ -1046,9 +1040,7 @@ textarea.input{resize:vertical;min-height:80px}
         <div class="tbl-wrap">
           <table>
             <thead><tr><th>#</th><th>Участник</th><th>Компания</th><th>Connections</th><th>Network Score</th></tr></thead>
-            <tbody>${[['МК','Мария Кузнецова','Яндекс',12,94],['ОС','Ольга Смирнова','Ozon',9,87],['ДВ','Дмитрий Волков','VK',8,81],['АС','Анна Соколова','Сбер',7,76],['НК','Никита Козлов','Мегафон',6,70]].map(([av,n,c,conn,score],i)=>`
-            <tr><td style="font-family:var(--mono);color:var(--text-dim)">${i+1}</td><td><div style="display:flex;align-items:center;gap:8px"><div class="pc-av" style="width:26px;height:26px;font-size:10px">${av}</div><strong>${n}</strong></div></td><td style="font-size:12px">${c}</td><td><span class="conn-pill">${conn}</span></td><td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;min-width:60px"><div class="progress-bar"><div class="progress-fill" style="width:${score}%;background:var(--accent)"></div></div></div><span style="font-family:var(--mono);font-size:11px;color:var(--text-muted)">${score}</span></div></td></tr>`).join('')}
-            </tbody>
+            <tbody id="network-top10-tbody"></tbody>
           </table>
         </div>
       </div>
@@ -1067,19 +1059,18 @@ textarea.input{resize:vertical;min-height:80px}
       <div class="card" style="margin-bottom:16px">
         <div class="section-title">Явка по часам</div>
         <div class="bar-chart">
-          ${[4,12,28,48,70,88,100,95,80,64,46,28].map((h,i)=>`<div class="bar" style="height:${h}%;background:${i>=4&&i<=6?'var(--accent)':'var(--surface3)'}" title="${9+i}:00"></div>`).join('')}
+          <div id="hourly-chart"></div>
         </div>
         <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--text-dim);font-family:var(--mono)"><span>09:00</span><span>14:00</span><span>20:00</span></div>
       </div>
       <div class="card">
         <div class="section-title">Event Log</div>
-        ${[['09:14','check_in','Мария Кузнецова','forum25'],['09:22','check_in','Ольга Смирнова','forum25'],['10:05','connection_request','Петров → Кузнецова','forum25'],['10:18','connection_accepted','Петров ↔ Кузнецова','7m 52s'],['11:34','connection_request','Смирнова → Волков','forum25'],['13:18','connection_rejected','Кузнецова ✗ Никитин','—']].map(([t,a,d,m])=>`
-        <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border)">
-          <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);flex-shrink:0;width:44px">${t}</span>
-          <span style="font-size:11px;padding:2px 8px;border-radius:4px;background:var(--accent-light);color:var(--accent);font-family:var(--mono);flex-shrink:0">${a}</span>
-          <span style="font-size:12px;color:var(--text-muted);flex:1">${d}</span>
-          <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">${m}</span>
-        </div>`).join('')}
+        <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);flex-shrink:0;width:44px">09:14</span><span style="font-size:11px;padding:2px 8px;border-radius:4px;background:var(--accent-light);color:var(--accent);font-family:var(--mono);flex-shrink:0">check_in</span><span style="font-size:12px;color:var(--text-muted);flex:1">Мария Кузнецова</span><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">forum25</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);flex-shrink:0;width:44px">09:22</span><span style="font-size:11px;padding:2px 8px;border-radius:4px;background:var(--accent-light);color:var(--accent);font-family:var(--mono);flex-shrink:0">check_in</span><span style="font-size:12px;color:var(--text-muted);flex:1">Ольга Смирнова</span><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">forum25</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);flex-shrink:0;width:44px">10:05</span><span style="font-size:11px;padding:2px 8px;border-radius:4px;background:var(--accent-light);color:var(--accent);font-family:var(--mono);flex-shrink:0">connection_request</span><span style="font-size:12px;color:var(--text-muted);flex:1">Петров → Кузнецова</span><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">forum25</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);flex-shrink:0;width:44px">10:18</span><span style="font-size:11px;padding:2px 8px;border-radius:4px;background:var(--green-light);color:var(--green);font-family:var(--mono);flex-shrink:0">connection_accepted</span><span style="font-size:12px;color:var(--text-muted);flex:1">Петров ↔ Кузнецова</span><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">7m 52s</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);flex-shrink:0;width:44px">11:34</span><span style="font-size:11px;padding:2px 8px;border-radius:4px;background:var(--accent-light);color:var(--accent);font-family:var(--mono);flex-shrink:0">connection_request</span><span style="font-size:12px;color:var(--text-muted);flex:1">Смирнова → Волков</span><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">forum25</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;"><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);flex-shrink:0;width:44px">13:18</span><span style="font-size:11px;padding:2px 8px;border-radius:4px;background:var(--red-light);color:var(--red);font-family:var(--mono);flex-shrink:0">connection_rejected</span><span style="font-size:12px;color:var(--text-muted);flex:1">Кузнецова ✗ Никитин</span><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">—</span></div>
       </div>
     </div>
 
@@ -1101,7 +1092,7 @@ textarea.input{resize:vertical;min-height:80px}
       <div style="position:relative">
         <div class="t-avatar" onclick="toggleAvatarMenu('a-av-dd')">NX</div>
         <div class="avatar-dropdown" id="a-av-dd">
-          <div class="av-item danger" onclick="goTo('auth')">→ Выйти</div>
+          <div class="av-item danger" onclick="db.auth.signOut().then(()=>goTo('auth'))">→ Выйти</div>
         </div>
       </div>
     </div>
@@ -1171,15 +1162,29 @@ textarea.input{resize:vertical;min-height:80px}
         <div class="kpi c-purple"><div class="kpi-label">Avg Conn/Event</div><div class="kpi-value">78</div></div>
       </div>
       <div class="g2">
-        <div class="card"><div class="section-title">ROI по событиям</div>${[['AI & Fintech Forum','89','0.63'],['Fintech Winter 2024','71','0.57'],['SaaS Summit 2025','41','0.47'],['B2B Leaders Forum','11','0.28']].map(([n,c,r],i)=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);width:18px">#${i+1}</span><div style="flex:1"><div style="font-size:13px;font-weight:500;margin-bottom:3px">${n}</div><div class="progress-bar"><div class="progress-fill" style="width:${[100,80,46,12][i]}%;background:var(--accent)"></div></div></div><span class="conn-pill">${c}</span></div>`).join('')}</div>
-        <div class="card"><div class="section-title">Cross-Event Intel</div>${[['Overlap участников','47','в 2+ событиях','var(--accent)'],['Repeat Attendance','31%','возвращаемость','var(--green)'],['Repeat Clusters','12','устойчивых кластеров','var(--purple)']].map(([l,v,d,c])=>`<div style="padding:10px 0;border-bottom:1px solid var(--border)"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:13px;color:var(--text-muted)">${l}</span><span style="font-family:var(--mono);font-size:18px;font-weight:800;color:${c}">${v}</span></div><div style="font-size:11px;color:var(--text-dim)">${d}</div></div>`).join('')}</div>
+        <div class="card"><div class="section-title">ROI по событиям</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);width:18px">#1</span><div style="flex:1"><div style="font-size:13px;font-weight:500;margin-bottom:3px">AI &amp; Fintech Forum</div><div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--accent)"></div></div></div><span class="conn-pill">89</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);width:18px">#2</span><div style="flex:1"><div style="font-size:13px;font-weight:500;margin-bottom:3px">Fintech Winter 2024</div><div class="progress-bar"><div class="progress-fill" style="width:80%;background:var(--accent)"></div></div></div><span class="conn-pill">71</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);width:18px">#3</span><div style="flex:1"><div style="font-size:13px;font-weight:500;margin-bottom:3px">SaaS Summit 2025</div><div class="progress-bar"><div class="progress-fill" style="width:46%;background:var(--accent)"></div></div></div><span class="conn-pill">41</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 0;"><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);width:18px">#4</span><div style="flex:1"><div style="font-size:13px;font-weight:500;margin-bottom:3px">B2B Leaders Forum</div><div class="progress-bar"><div class="progress-fill" style="width:12%;background:var(--accent)"></div></div></div><span class="conn-pill">11</span></div>
+        </div>
+        <div class="card"><div class="section-title">Cross-Event Intel</div>
+          <div style="padding:10px 0;border-bottom:1px solid var(--border)"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:13px;color:var(--text-muted)">Overlap участников</span><span style="font-family:var(--mono);font-size:18px;font-weight:800;color:var(--accent)">47</span></div><div style="font-size:11px;color:var(--text-dim)">в 2+ событиях</div></div>
+          <div style="padding:10px 0;border-bottom:1px solid var(--border)"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:13px;color:var(--text-muted)">Repeat Attendance</span><span style="font-family:var(--mono);font-size:18px;font-weight:800;color:var(--green)">31%</span></div><div style="font-size:11px;color:var(--text-dim)">возвращаемость</div></div>
+          <div style="padding:10px 0;"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:13px;color:var(--text-muted)">Repeat Clusters</span><span style="font-family:var(--mono);font-size:18px;font-weight:800;color:var(--purple)">12</span></div><div style="font-size:11px;color:var(--text-dim)">устойчивых кластеров</div></div>
+        </div>
       </div>
     </div>
     <div id="admin-users" class="tab-content">
       <div class="ph"><h1>Team Access</h1></div>
       <div class="card" style="padding:0"><div class="tbl-wrap"><table>
         <thead><tr><th>Пользователь</th><th>Компания</th><th>Роль</th><th>Событий</th><th>Connections</th><th></th></tr></thead>
-        <tbody>${[['ЕК','Елена Кравцова','Events Co.','organizer',3,48],['ИП','Иван Петров','Nexora Corp','participant',2,3],['МК','Мария Кузнецова','Яндекс','participant',4,12],['ДВ','Дмитрий Волков','VK','participant',3,8]].map(([av,n,c,r,ev,cn])=>`<tr><td><div style="display:flex;align-items:center;gap:8px"><div class="pc-av" style="width:26px;height:26px;font-size:10px">${av}</div><strong>${n}</strong></div></td><td style="font-size:12px">${c}</td><td><select class="input" style="padding:3px 7px;font-size:11px;height:auto;width:auto;font-family:var(--mono)"><option ${r==='participant'?'selected':''}>participant</option><option ${r==='organizer'?'selected':''}>organizer</option><option ${r==='admin'?'selected':''}>admin</option></select></td><td style="font-family:var(--mono)">${ev}</td><td><span class="conn-pill">${cn}</span></td><td><button class="btn btn-ghost btn-sm">Профиль</button></td></tr>`).join('')}</tbody>
+        <tbody>
+          <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="pc-av" style="width:26px;height:26px;font-size:10px">ЕК</div><strong>Елена Кравцова</strong></div></td><td style="font-size:12px">Events Co.</td><td><select class="input" style="padding:3px 7px;font-size:11px;height:auto;width:auto;font-family:var(--mono)"><option>participant</option><option selected>organizer</option><option>admin</option></select></td><td style="font-family:var(--mono)">3</td><td><span class="conn-pill">48</span></td><td><button class="btn btn-ghost btn-sm">Профиль</button></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="pc-av" style="width:26px;height:26px;font-size:10px">ИП</div><strong>Иван Петров</strong></div></td><td style="font-size:12px">Nexora Corp</td><td><select class="input" style="padding:3px 7px;font-size:11px;height:auto;width:auto;font-family:var(--mono)"><option selected>participant</option><option>organizer</option><option>admin</option></select></td><td style="font-family:var(--mono)">2</td><td><span class="conn-pill">3</span></td><td><button class="btn btn-ghost btn-sm">Профиль</button></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="pc-av" style="width:26px;height:26px;font-size:10px">МК</div><strong>Мария Кузнецова</strong></div></td><td style="font-size:12px">Яндекс</td><td><select class="input" style="padding:3px 7px;font-size:11px;height:auto;width:auto;font-family:var(--mono)"><option selected>participant</option><option>organizer</option><option>admin</option></select></td><td style="font-family:var(--mono)">4</td><td><span class="conn-pill">12</span></td><td><button class="btn btn-ghost btn-sm">Профиль</button></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="pc-av" style="width:26px;height:26px;font-size:10px">ДВ</div><strong>Дмитрий Волков</strong></div></td><td style="font-size:12px">VK</td><td><select class="input" style="padding:3px 7px;font-size:11px;height:auto;width:auto;font-family:var(--mono)"><option selected>participant</option><option>organizer</option><option>admin</option></select></td><td style="font-family:var(--mono)">3</td><td><span class="conn-pill">8</span></td><td><button class="btn btn-ghost btn-sm">Профиль</button></td></tr>
+        </tbody>
       </table></div></div>
     </div>
   </div></div>
@@ -1445,6 +1450,96 @@ async function loadAttendees(eventId) {
   }));
   renderAttendees(attendees);
 }
+// ─── MY CONNECTIONS (real) ───
+async function loadMyConnections() {
+  if (!STATE.currentUser) return;
+  const uid = STATE.currentUser.id;
+  const { data } = await db
+    .from('connections')
+    .select(`id, tags, accepted_at, status, event:event_id(title),
+      requester:requester_id(id, first_name, last_name, company, job_title, city, interests),
+      receiver:receiver_id(id, first_name, last_name, company, job_title, city, interests)`)
+    .or(`requester_id.eq.${uid},receiver_id.eq.${uid}`)
+    .eq('status', 'accepted');
+  if (!data) return;
+  const conns = data.map(c => {
+    const other = c.requester?.id === uid ? c.receiver : c.requester;
+    if (!other) return null;
+    return { id: other.id, init: getInitials(other.first_name, other.last_name),
+      name: `${other.first_name||''} ${other.last_name||''}`.trim(),
+      company: other.company||'—', role: other.job_title||'—', city: other.city||'',
+      interests: other.interests||[], event: c.event?.title||'', connections: 0,
+      tags: c.tags||[], connectionId: c.id };
+  }).filter(Boolean);
+  MY_CONNECTIONS.length = 0;
+  conns.forEach(c => MY_CONNECTIONS.push(c));
+  const badge = document.getElementById('p-conn-badge');
+  if (badge) badge.textContent = conns.length;
+  const totalEl = document.getElementById('p-total-conn');
+  if (totalEl) totalEl.textContent = conns.length;
+  const evConn = document.getElementById('event-conn-count');
+  if (evConn) evConn.textContent = conns.length;
+  renderConnections(MY_CONNECTIONS);
+  renderEvMyConnections();
+}
+
+async function loadPendingRequests() {
+  if (!STATE.currentUser) return;
+  const { data } = await db
+    .from('connections')
+    .select(`id, created_at, event:event_id(title),
+      requester:requester_id(id, first_name, last_name, company, job_title, city, interests)`)
+    .eq('receiver_id', STATE.currentUser.id)
+    .eq('status', 'pending');
+  if (!data) return;
+  PENDING_REQUESTS.length = 0;
+  data.forEach(r => {
+    if (!r.requester) return;
+    PENDING_REQUESTS.push({ id: r.id, init: getInitials(r.requester.first_name, r.requester.last_name),
+      name: `${r.requester.first_name||''} ${r.requester.last_name||''}`.trim(),
+      company: r.requester.company||'—', role: r.requester.job_title||'—',
+      event: r.event?.title||'Мероприятие', interests: r.requester.interests||[] });
+  });
+  const pbadge = document.getElementById('p-pending-badge');
+  if (pbadge) { pbadge.textContent = PENDING_REQUESTS.length||''; pbadge.style.display = PENDING_REQUESTS.length ? '' : 'none'; }
+  renderPending();
+}
+
+async function sendConnectionRequest() {
+  if (!STATE.currentUser) { toast('Войдите в аккаунт', 'error'); return; }
+  const panelId = document.getElementById('p-detail-panel').dataset.userId;
+  const targetName = document.getElementById('dp-name').textContent;
+  if (!panelId) { toast('Запрос отправлен', 'success'); closePanel(); return; }
+  const { error } = await db.from('connections').insert({
+    requester_id: STATE.currentUser.id, receiver_id: panelId, event_id: STATE.currentEventId||null });
+  if (error?.code === '23505') { toast('Запрос уже отправлен', 'info'); closePanel(); return; }
+  if (error) { toast('Ошибка: '+error.message, 'error'); return; }
+  toast(`Запрос отправлен — ${targetName}`, 'success');
+  closePanel();
+}
+
+async function acceptPending(id) {
+  const { error } = await db.from('connections')
+    .update({ status: 'accepted', accepted_at: new Date().toISOString() }).eq('id', id);
+  if (error) { toast('Ошибка', 'error'); return; }
+  await loadMyConnections(); await loadPendingRequests();
+  toast('Контакт добавлен в Мои связи', 'success');
+}
+
+async function declinePending(id) {
+  await db.from('connections').delete().eq('id', id);
+  await loadPendingRequests();
+  toast('Запрос отклонён', 'info');
+}
+
+function getInitials(first, last) {
+  return ((first?.[0]||'')+(last?.[0]||'')).toUpperCase()||'??';
+}
+
+async function loadParticipantData() {
+  await Promise.all([loadMyConnections(), loadPendingRequests()]);
+}
+
 function partTab(t,bc){
   document.querySelectorAll('#screen-participant .tab-content').forEach(el=>el.classList.remove('active'));
   const el=document.getElementById('part-'+t);
@@ -1583,6 +1678,8 @@ function openPanel(id){
   const a=ATTENDEES_DATA.find(a=>a.id===id)||MY_CONNECTIONS.find(c=>c.id===id);
   if(!a) return;
   const isMyConn=MY_CONNECTIONS.some(c=>c.id===id);
+  // Store user id for sendConnectionRequest
+  document.getElementById('p-detail-panel').dataset.userId = id;
   document.getElementById('dp-av').textContent=a.init;
   document.getElementById('dp-name').textContent=a.name;
   document.getElementById('dp-role').textContent=`${a.company} · ${a.role}`;
@@ -1855,6 +1952,68 @@ renderConnections(MY_CONNECTIONS);
 renderPending();
 renderEvMyConnections();
 renderRegs();
+
+// Org top-5 list
+(function(){
+  const el = document.getElementById('org-top5-list');
+  if (!el) return;
+  const data = [['МК','Мария Кузнецова','Яндекс',12],['ОС','Ольга Смирнова','Ozon',9],['ДВ','Дмитрий Волков','VK',8],['АС','Анна Соколова','Сбер',7],['НК','Никита Козлов','Мегафон',6]];
+  el.innerHTML = data.map(([av,n,c,cnt],i) => `
+  <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+    <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);width:16px">#${i+1}</span>
+    <div class="pc-av" style="width:26px;height:26px;font-size:10px">${av}</div>
+    <div style="flex:1"><div style="font-size:13px;font-weight:500">${n}</div><div style="font-size:11px;color:var(--text-muted)">${c}</div></div>
+    <span class="conn-pill">${cnt}</span>
+  </div>`).join('');
+})();
+
+// Network analytics top-10
+(function(){
+  const tbody = document.getElementById('network-top10-tbody');
+  if (!tbody) return;
+  const data = [['МК','Мария Кузнецова','Яндекс',12,94],['ОС','Ольга Смирнова','Ozon',9,87],['ДВ','Дмитрий Волков','VK',8,81],['АС','Анна Соколова','Сбер',7,76],['НК','Никита Козлов','Мегафон',6,70]];
+  tbody.innerHTML = data.map(([av,n,c,conn,score],i) => `
+  <tr>
+    <td style="font-family:var(--mono);color:var(--text-dim)">${i+1}</td>
+    <td><div style="display:flex;align-items:center;gap:8px"><div class="pc-av" style="width:26px;height:26px;font-size:10px">${av}</div><strong>${n}</strong></div></td>
+    <td style="font-size:12px">${c}</td>
+    <td><span class="conn-pill">${conn}</span></td>
+    <td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;min-width:60px"><div class="progress-bar"><div class="progress-fill" style="width:${score}%;background:var(--accent)"></div></div></div><span style="font-family:var(--mono);font-size:11px;color:var(--text-muted)">${score}</span></div></td>
+  </tr>`).join('');
+})();
+
+// Activity bar chart
+(function(){
+  const el = document.getElementById('activity-bar-chart');
+  if (!el) return;
+  const vals = [0,1,0,2,1,0,0,3,1,0,2,0,1,0,0,1,0,2,0,1,0,0,0,1,2,0,1,3,2,4];
+  el.innerHTML = vals.map(h => `<div class="bar" style="height:${Math.max(h*16,3)}px;background:${h>0?'var(--accent)':'var(--surface3)'};border-radius:2px 2px 0 0"></div>`).join('');
+})();
+
+// Hourly chart
+(function(){
+  const el = document.getElementById('hourly-chart');
+  if (!el) return;
+  el.className = 'bar-chart';
+  const vals = [4,12,28,48,70,88,100,95,80,64,46,28];
+  el.innerHTML = vals.map((h,i) => `<div class="bar" style="height:${h}%;background:${i>=4&&i<=6?'var(--accent)':'var(--surface3)'}" title="${9+i}:00"></div>`).join('');
+})();
+
+// Проверяем есть ли активная сессия (пользователь уже залогинен)
+(async () => {
+  const { data: { session } } = await db.auth.getSession();
+  if (session?.user) {
+    STATE.currentUser = session.user;
+    const profile = await loadMyProfile();
+    STATE.currentProfile = profile;
+    navigateByRole(profile?.role || 'participant');
+  }
+})();
+
+// Слушаем изменения авторизации
+db.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_OUT') { goTo('auth'); }
+});
 </script>
 </body>
 </html>
