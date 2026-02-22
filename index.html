@@ -1,0 +1,1860 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Nexora — B2B Networking Platform</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* Light theme */
+  --bg:#f5f6fa;
+  --bg2:#eef0f6;
+  --bg3:#e8eaf2;
+  --surface:#ffffff;
+  --surface2:#f8f9fc;
+  --surface3:#f0f2f8;
+  --border:#e4e7f0;
+  --border2:#d0d4e8;
+  --text:#0f1120;
+  --text-muted:#5a6080;
+  --text-dim:#9aa0bc;
+
+  --accent:#1a6ef5;
+  --accent2:#1258cc;
+  --accent-light:#eef4ff;
+  --accent-dim:rgba(26,110,245,.08);
+
+  --green:#0fba7a;
+  --green-light:#edfbf5;
+  --green-dim:rgba(15,186,122,.1);
+  --yellow:#f59e0b;
+  --yellow-light:#fffbeb;
+  --yellow-dim:rgba(245,158,11,.1);
+  --red:#ef4444;
+  --red-light:#fef2f2;
+  --red-dim:rgba(239,68,68,.1);
+  --purple:#7c3aed;
+  --purple-light:#f5f3ff;
+  --purple-dim:rgba(124,58,237,.1);
+
+  --radius:10px;
+  --font:'DM Sans',system-ui,sans-serif;
+  --font-display:'Syne',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+  --sidebar-w:224px;
+  --topbar-h:56px;
+  --shadow:0 1px 3px rgba(15,17,32,.08),0 1px 2px rgba(15,17,32,.04);
+  --shadow-md:0 4px 16px rgba(15,17,32,.1),0 2px 4px rgba(15,17,32,.06);
+  --shadow-lg:0 12px 40px rgba(15,17,32,.14),0 4px 8px rgba(15,17,32,.06);
+}
+
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.6;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ─── SCREENS ─── */
+.screen{display:none;min-height:100vh}
+.screen.active{display:block;animation:fadeUp .22s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── TOPBAR ─── */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--topbar-h);
+  background:rgba(255,255,255,.95);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;gap:14px}
+.t-logo{font-family:var(--font-display);font-size:17px;font-weight:800;letter-spacing:-.5px;
+  cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--text);user-select:none;flex-shrink:0}
+.t-logo-icon{width:26px;height:26px;border-radius:7px;
+  background:linear-gradient(135deg,var(--accent),#0d4bb5);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(26,110,245,.25)}
+.t-logo-icon svg{width:13px;height:13px;fill:none;stroke:#fff;stroke-width:2.2}
+.t-sep{width:1px;height:18px;background:var(--border2);flex-shrink:0}
+.t-breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-dim);font-family:var(--mono)}
+.t-breadcrumb-current{color:var(--text-muted)}
+.t-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.t-role{font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:.04em;padding:3px 10px;border-radius:20px;border:1px solid}
+.t-role.participant{color:var(--accent);background:var(--accent-light);border-color:rgba(26,110,245,.2)}
+.t-role.organizer{color:var(--purple);background:var(--purple-light);border-color:rgba(124,58,237,.2)}
+.t-role.admin{color:var(--yellow);background:var(--yellow-light);border-color:rgba(245,158,11,.2)}
+.t-notif{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);
+  background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  position:relative;transition:all .12s}
+.t-notif:hover{background:var(--surface2);border-color:var(--border2)}
+.t-notif svg{width:14px;height:14px;stroke:var(--text-muted);fill:none}
+.t-notif-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:var(--red);
+  border-radius:50%;border:1.5px solid var(--surface);box-shadow:0 0 4px var(--red)}
+.t-avatar{width:32px;height:32px;border-radius:9px;
+  background:linear-gradient(135deg,var(--accent-light),var(--surface3));
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;
+  color:var(--accent);cursor:pointer;border:1.5px solid rgba(26,110,245,.2);
+  font-family:var(--mono);position:relative;transition:all .15s}
+.t-avatar:hover{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,110,245,.1)}
+.t-hamburger{display:none;width:32px;height:32px;border:1px solid var(--border);border-radius:8px;
+  background:var(--surface);cursor:pointer;align-items:center;justify-content:center;flex-direction:column;gap:4px}
+.t-hamburger span{display:block;width:14px;height:1.5px;background:var(--text-muted);border-radius:1px}
+
+/* ─── DROPDOWNS ─── */
+.notif-dropdown{display:none;position:absolute;top:calc(100%+8px);right:0;width:310px;
+  background:var(--surface);border:1px solid var(--border2);border-radius:12px;
+  box-shadow:var(--shadow-lg);z-index:400;overflow:hidden}
+.notif-dropdown.open{display:block;animation:fadeUp .15s ease}
+.notif-header{padding:12px 14px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;
+  display:flex;justify-content:space-between;align-items:center;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--text-muted);font-family:var(--mono)}
+.notif-clear{font-size:11px;color:var(--accent);cursor:pointer;font-weight:400;text-transform:none;letter-spacing:0}
+.notif-item{padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.notif-item:hover{background:var(--surface2)}
+.notif-item:last-child{border-bottom:none}
+.notif-item-title{font-size:13px;font-weight:500;margin-bottom:2px}
+.notif-item-sub{font-size:12px;color:var(--text-muted)}
+.notif-item-time{font-size:11px;color:var(--text-dim);font-family:var(--mono);margin-top:3px}
+.notif-unread{background:var(--accent-light)}
+.notif-unread .notif-item-title{color:var(--accent)}
+.avatar-dropdown{display:none;position:absolute;top:calc(100%+8px);right:0;width:200px;
+  background:var(--surface);border:1px solid var(--border2);border-radius:12px;
+  box-shadow:var(--shadow-lg);z-index:400;overflow:hidden;padding:5px}
+.avatar-dropdown.open{display:block;animation:fadeUp .15s ease}
+.av-item{padding:9px 10px;border-radius:7px;font-size:13px;color:var(--text-muted);cursor:pointer;
+  transition:all .1s;display:flex;align-items:center;gap:8px}
+.av-item:hover{background:var(--surface2);color:var(--text)}
+.av-item.danger{color:var(--red)}
+.av-item.danger:hover{background:var(--red-light)}
+
+/* ─── SIDEBAR ─── */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
+  padding:12px 10px;position:fixed;top:var(--topbar-h);bottom:0;left:0;
+  overflow-y:auto;z-index:100;transition:transform .2s ease}
+.sidebar-section{margin-bottom:4px}
+.sidebar-label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);
+  padding:0 10px;margin:14px 0 4px;font-weight:700;font-family:var(--mono)}
+.s-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;
+  font-size:13px;color:var(--text-muted);cursor:pointer;transition:all .12s;
+  border:none;background:none;width:100%;text-align:left;font-family:var(--font);font-weight:400}
+.s-item:hover{color:var(--text);background:var(--surface2)}
+.s-item.active{color:var(--accent);background:var(--accent-light);font-weight:600}
+.s-item.active .s-icon{color:var(--accent);opacity:1}
+.s-icon{width:15px;height:15px;flex-shrink:0;opacity:.45;transition:opacity .12s}
+.s-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:9px;font-weight:700;
+  padding:1px 6px;border-radius:10px;font-family:var(--mono)}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99}
+.sidebar-overlay.open{display:block}
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0);box-shadow:var(--shadow-lg)}
+  .t-hamburger{display:flex}
+  .t-breadcrumb{display:none}
+}
+
+/* ─── LAYOUT ─── */
+.layout{display:flex;padding-top:var(--topbar-h);min-height:100vh;width:100%}
+.main{flex:1;margin-left:var(--sidebar-w);padding:28px 32px;min-width:0}
+@media(max-width:900px){.main{margin-left:0;padding:20px 16px}}
+
+/* ─── PAGE HEADER ─── */
+.ph{margin-bottom:24px}
+.ph h1{font-size:20px;font-weight:700;letter-spacing:-.4px;font-family:var(--font-display);color:var(--text)}
+.ph p{color:var(--text-muted);font-size:13px;margin-top:2px}
+.ph-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ph-divider{height:1px;background:var(--border);margin-top:16px}
+
+/* ─── CARDS ─── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.card-sm{padding:14px 16px}
+
+/* ─── KPI CARDS ─── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px 20px;position:relative;overflow:hidden;transition:all .15s;box-shadow:var(--shadow)}
+.kpi:hover{border-color:var(--border2);box-shadow:var(--shadow-md)}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:transparent}
+.kpi.c-accent::after{background:var(--accent)}
+.kpi.c-green::after{background:var(--green)}
+.kpi.c-yellow::after{background:var(--yellow)}
+.kpi.c-purple::after{background:var(--purple)}
+.kpi-label{font-size:10px;color:var(--text-dim);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px;font-weight:700;font-family:var(--mono)}
+.kpi-value{font-size:26px;font-weight:700;letter-spacing:-.8px;font-family:var(--mono);color:var(--text);line-height:1}
+.kpi.c-accent .kpi-value{color:var(--accent)}
+.kpi.c-green .kpi-value{color:var(--green)}
+.kpi.c-yellow .kpi-value{color:var(--yellow)}
+.kpi.c-purple .kpi-value{color:var(--purple)}
+.kpi-sub{font-size:11px;color:var(--text-dim);margin-top:6px}
+.kpi-trend{display:inline-flex;align-items:center;gap:2px;font-size:10px;font-family:var(--mono)}
+.kpi-trend.up{color:var(--green)}
+.kpi-trend.down{color:var(--red)}
+@media(max-width:900px){.kpi-grid{grid-template-columns:1fr 1fr}}
+
+/* ─── PROGRESS ─── */
+.progress-bar{background:var(--surface3);border-radius:4px;height:5px;overflow:hidden}
+.progress-fill{height:100%;border-radius:4px;transition:width .6s ease}
+
+/* ─── TABLES ─── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead tr{border-bottom:1px solid var(--border)}
+th{text-align:left;padding:9px 14px;font-size:10px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--text-dim);font-weight:700;background:var(--surface2);white-space:nowrap;cursor:pointer;
+  user-select:none;font-family:var(--mono)}
+th:hover{color:var(--text-muted)}
+th.sortable::after{content:' ↕';opacity:.3}
+td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text-muted);vertical-align:middle}
+tbody tr{transition:background .1s;cursor:pointer}
+tbody tr:hover td{background:var(--surface2)}
+tbody tr:last-child td{border-bottom:none}
+td strong{color:var(--text);font-weight:500}
+.checkbox-col{width:36px}
+input[type=checkbox]{width:14px;height:14px;accent-color:var(--accent);cursor:pointer}
+
+/* ─── BADGES ─── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:600;font-family:var(--mono)}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.badge-pending{background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(245,158,11,.2)}.badge-pending::before{background:var(--yellow)}
+.badge-approved{background:var(--green-dim);color:var(--green);border:1px solid rgba(15,186,122,.2)}.badge-approved::before{background:var(--green)}
+.badge-rejected{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,.2)}.badge-rejected::before{background:var(--red)}
+.badge-checkedin{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(26,110,245,.2)}.badge-checkedin::before{background:var(--accent)}
+.badge-draft{background:var(--surface3);color:var(--text-dim);border:1px solid var(--border)}.badge-draft::before{background:var(--text-dim)}
+.badge-active{background:var(--green-dim);color:var(--green);border:1px solid rgba(15,186,122,.2)}.badge-active::before{background:var(--green)}
+.badge-closed{background:var(--surface3);color:var(--text-dim);border:1px solid var(--border)}.badge-closed::before{background:var(--text-dim)}
+
+/* ─── BUTTONS ─── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .12s;border:1px solid transparent;font-family:var(--font);line-height:1;white-space:nowrap;user-select:none}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover:not(:disabled){background:var(--accent2);box-shadow:0 4px 12px rgba(26,110,245,.3)}
+.btn-ghost{background:var(--surface2);color:var(--text-muted);border-color:var(--border)}
+.btn-ghost:hover:not(:disabled){background:var(--surface3);color:var(--text);border-color:var(--border2)}
+.btn-danger{background:var(--red-dim);color:var(--red);border-color:rgba(239,68,68,.2)}
+.btn-danger:hover:not(:disabled){background:rgba(239,68,68,.15)}
+.btn-success{background:var(--green-dim);color:var(--green);border-color:rgba(15,186,122,.25)}
+.btn-success:hover:not(:disabled){background:rgba(15,186,122,.18)}
+.btn-lg{padding:12px 24px;font-size:15px;border-radius:10px}
+.btn-sm{padding:5px 11px;font-size:12px;border-radius:6px}
+.btn-xs{padding:3px 8px;font-size:11px;border-radius:5px}
+
+/* ─── INPUTS ─── */
+.ig{margin-bottom:14px}
+.ig label{display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:5px;font-family:var(--mono);letter-spacing:.03em}
+.ig .req{color:var(--red);margin-left:2px}
+.input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:9px 13px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;
+  transition:border-color .12s,box-shadow .12s;caret-color:var(--accent)}
+.input:focus{border-color:rgba(26,110,245,.4);box-shadow:0 0 0 3px rgba(26,110,245,.08)}
+.input::placeholder{color:var(--text-dim)}
+.input.error{border-color:var(--red)!important;box-shadow:0 0 0 3px rgba(239,68,68,.08)!important}
+.field-error{font-size:11px;color:var(--red);margin-top:4px;display:none}
+.field-error.show{display:block}
+select.input{cursor:pointer}
+textarea.input{resize:vertical;min-height:80px}
+
+/* ─── TABS ─── */
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px;gap:2px}
+.tab{padding:9px 15px;font-size:13px;color:var(--text-dim);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .12s;font-weight:500}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.tab:hover:not(.active){color:var(--text-muted)}
+.tab-content{display:none}
+.tab-content.active{display:block;animation:fadeUp .2s ease}
+
+/* ─── GRID ─── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:700px){.g2,.g3{grid-template-columns:1fr}}
+
+/* ─── ALERTS ─── */
+.alert{padding:12px 15px;border-radius:8px;font-size:13px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;line-height:1.5}
+.alert-info{background:var(--accent-light);border:1px solid rgba(26,110,245,.2);color:#1a3a80}
+.alert-success{background:var(--green-light);border:1px solid rgba(15,186,122,.2);color:#0a6045}
+.alert-warn{background:var(--yellow-light);border:1px solid rgba(245,158,11,.25);color:#854d0e}
+
+/* ─── DIVIDER ─── */
+.divider{height:1px;background:var(--border);margin:16px 0}
+
+/* ─── PERSON CARD ─── */
+.pc{display:flex;align-items:center;gap:12px;padding:12px 15px;background:var(--surface);
+  border-radius:10px;border:1px solid var(--border);transition:all .12s;box-shadow:var(--shadow)}
+.pc:hover{border-color:var(--border2);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.pc-av{width:38px;height:38px;border-radius:10px;background:var(--accent-light);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;
+  color:var(--accent);flex-shrink:0;border:1.5px solid rgba(26,110,245,.15);font-family:var(--mono)}
+.pc-av.large{width:52px;height:52px;font-size:16px;border-radius:13px}
+.pc-info{flex:1;min-width:0}
+.pc-name{font-size:13px;font-weight:600;color:var(--text)}
+.pc-role{font-size:12px;color:var(--text-muted)}
+.pc-meta{font-size:11px;color:var(--text-dim);margin-top:1px;font-family:var(--mono)}
+
+/* ─── DETAIL PANEL ─── */
+.detail-panel{display:none;position:fixed;top:var(--topbar-h);right:0;bottom:0;width:360px;
+  background:var(--surface);border-left:1px solid var(--border);box-shadow:-6px 0 32px rgba(15,17,32,.12);
+  z-index:150;overflow-y:auto;animation:slideIn .2s ease}
+.detail-panel.open{display:block}
+@keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+.dp-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:7px;
+  background:none;border:1px solid var(--border);cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;color:var(--text-muted)}
+.dp-close:hover{background:var(--surface2)}
+
+/* ─── MODAL ─── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,17,32,.5);z-index:500;
+  align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex;animation:fadeIn .15s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:26px;
+  max-width:480px;width:100%;box-shadow:var(--shadow-lg);animation:fadeUp .15s ease}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:6px;font-family:var(--font-display)}
+.modal-sub{font-size:13px;color:var(--text-muted);margin-bottom:20px;line-height:1.5}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+
+/* ─── TOAST ─── */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:10px;font-size:13px;font-weight:500;pointer-events:all;animation:slideRight .25s ease;min-width:240px;box-shadow:var(--shadow-md)}
+@keyframes slideRight{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+.toast.out{animation:fadeOut .2s ease forwards}
+@keyframes fadeOut{to{opacity:0;transform:translateX(10px)}}
+.toast-success{background:var(--green-light);border:1px solid rgba(15,186,122,.3);color:#0a6045}
+.toast-error{background:var(--red-light);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+.toast-info{background:var(--accent-light);border:1px solid rgba(26,110,245,.25);color:var(--accent)}
+.toast-icon{font-size:15px}
+
+/* ─── BAR CHART ─── */
+.bar-chart{display:flex;align-items:flex-end;gap:3px;height:80px;margin-top:12px}
+.bar{flex:1;border-radius:3px 3px 0 0;min-width:4px;transition:opacity .15s;cursor:pointer}
+.bar:hover{opacity:.75}
+
+/* ─── LIVE DOT ─── */
+.live-dot{display:inline-block;width:7px;height:7px;background:var(--green);border-radius:50%;
+  animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(15,186,122,.4)}50%{box-shadow:0 0 0 5px transparent}}
+
+/* ─── HEATMAP ─── */
+.activity-heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.heat-cell{height:22px;border-radius:3px;cursor:pointer;transition:opacity .1s}
+.heat-cell:hover{opacity:.7}
+
+/* ─── TAGS ─── */
+.tag-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;
+  font-size:12px;background:var(--surface3);color:var(--text-muted);border:1px solid var(--border);
+  font-family:var(--mono);transition:all .1s}
+.tag.removable{cursor:pointer}
+.tag.removable:hover{background:var(--red-dim);color:var(--red);border-color:rgba(239,68,68,.2)}
+.tag-input{border:1px dashed var(--border2);background:transparent;padding:3px 10px;
+  border-radius:20px;font-size:12px;font-family:var(--mono);color:var(--text);outline:none;width:100px;
+  transition:all .12s}
+.tag-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
+
+/* ─── MISC ─── */
+.section-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.conn-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:12px;font-size:11px;font-family:var(--mono);font-weight:700;background:var(--purple-dim);color:var(--purple);border:1px solid rgba(124,58,237,.2)}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-dim)}
+.empty-icon{font-size:36px;margin-bottom:10px;opacity:.5}
+
+/* ─── AUTH ─── */
+.auth-bg{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:linear-gradient(145deg,#f0f4ff 0%,#f8f5ff 50%,#f0fff8 100%)}
+.auth-card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);
+  border-radius:18px;padding:38px;box-shadow:var(--shadow-lg)}
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:30px}
+.auth-logo-icon{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#0d4bb5);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(26,110,245,.3)}
+.auth-logo-icon svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2.2}
+.auth-logo-text{font-family:var(--font-display);font-size:21px;font-weight:800;letter-spacing:-.5px}
+.auth-logo-sub{font-size:12px;color:var(--text-dim);font-family:var(--mono);margin-top:1px}
+
+/* ─── QR SCREEN ─── */
+.qr-main{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - var(--topbar-h));padding:24px;margin-top:var(--topbar-h);background:var(--bg)}
+.qr-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:34px;max-width:380px;width:100%;text-align:center;box-shadow:var(--shadow-lg)}
+
+/* ─── SCAN QR (Participant) ─── */
+.scan-area{width:220px;height:220px;border:2px solid rgba(26,110,245,.25);border-radius:16px;
+  display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+  background:var(--surface2)}
+.scan-line{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:scan 2s linear infinite}
+@keyframes scan{0%{top:0}100%{top:100%}}
+
+/* ─── POST-SCAN CARD ─── */
+.post-scan-overlay{display:none;position:fixed;inset:0;background:rgba(15,17,32,.5);z-index:600;
+  align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px)}
+.post-scan-overlay.open{display:flex;animation:fadeIn .2s ease}
+.post-scan-card{background:var(--surface);border-radius:18px;padding:30px;max-width:380px;width:100%;
+  box-shadow:var(--shadow-lg);animation:fadeUp .2s ease;text-align:center}
+.post-scan-av{width:72px;height:72px;border-radius:18px;background:var(--accent-light);
+  display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;
+  color:var(--accent);font-family:var(--mono);margin:0 auto 14px;border:2px solid rgba(26,110,245,.2)}
+
+/* ─── CONN CARD ─── */
+.conn-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;
+  box-shadow:var(--shadow);transition:all .15s;cursor:pointer}
+.conn-card:hover{border-color:var(--border2);box-shadow:var(--shadow-md)}
+.conn-event-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;
+  font-size:11px;font-family:var(--mono);font-weight:600;background:var(--surface3);color:var(--text-muted);border:1px solid var(--border);margin-top:8px}
+
+/* ─── PROFILE PHOTO UPLOAD ─── */
+.photo-upload{width:80px;height:80px;border-radius:20px;background:var(--accent-light);
+  border:2px dashed rgba(26,110,245,.3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .15s;flex-shrink:0}
+.photo-upload:hover{border-color:var(--accent);background:var(--accent-dim)}
+.photo-upload-icon{font-size:28px;opacity:.5}
+
+/* ─── NETWORK SCORE RING ─── */
+.score-ring-wrap{display:flex;align-items:center;gap:20px;padding:18px;background:var(--accent-light);
+  border-radius:12px;border:1px solid rgba(26,110,245,.15)}
+.score-ring{position:relative;width:72px;height:72px;flex-shrink:0}
+.score-ring svg{transform:rotate(-90deg)}
+.score-ring-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:18px;font-weight:800;color:var(--accent)}
+
+/* ─── PENDING BANNER ─── */
+.pending-banner{background:var(--yellow-light);border:1px solid rgba(245,158,11,.25);border-radius:12px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.pending-count{font-family:var(--mono);font-size:22px;font-weight:800;color:var(--yellow)}
+</style>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<!-- ══════════ AUTH ══════════ -->
+<div id="screen-auth" class="screen active">
+  <div class="auth-bg">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">
+          <svg viewBox="0 0 20 20"><circle cx="10" cy="5" r="2.5"/><circle cx="3" cy="15" r="2.5"/><circle cx="17" cy="15" r="2.5"/><line x1="10" y1="7.5" x2="3" y2="12.5"/><line x1="10" y1="7.5" x2="17" y2="12.5"/></svg>
+        </div>
+        <div>
+          <div class="auth-logo-text">Nexora</div>
+          <div class="auth-logo-sub">B2B Networking Platform</div>
+        </div>
+      </div>
+      <div style="font-size:22px;font-weight:800;font-family:var(--font-display);margin-bottom:4px">Войти в платформу</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:24px">Введите email — роль будет определена автоматически</div>
+      <div class="ig"><label>Email<span class="req">*</span></label><input class="input" id="auth-email" type="email" value="ivan@nexora.io" placeholder="you@company.com"/></div>
+      <div class="ig" style="margin-bottom:20px"><label>Пароль<span class="req">*</span></label><input class="input" type="password" value="••••••••" placeholder="••••••••"/></div>
+      <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center" onclick="doLogin('participant')">Войти как участник</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+        <button class="btn btn-ghost" style="justify-content:center;font-size:12px" onclick="doLogin('organizer')">Войти как организатор</button>
+        <button class="btn btn-ghost" style="justify-content:center;font-size:12px" onclick="doLogin('admin')">Super Admin</button>
+      </div>
+      <div class="divider"></div>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="showRegForm()">Зарегистрироваться →</button>
+      <!-- REG FORM -->
+      <div id="reg-form" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:14px;font-family:var(--font-display)">Регистрация</div>
+        <div class="g2"><div class="ig"><label>Имя</label><input class="input" placeholder="Иван"/></div><div class="ig"><label>Фамилия</label><input class="input" placeholder="Петров"/></div></div>
+        <div class="ig"><label>Компания</label><input class="input" placeholder="Nexora Corp"/></div>
+        <div class="ig"><label>Должность</label><input class="input" placeholder="CEO"/></div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doLogin('participant')">Создать аккаунт</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PARTICIPANT ══════════ -->
+<div id="screen-participant" class="screen">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="t-hamburger" onclick="toggleSidebar('p-sidebar','p-overlay')"><span></span><span></span><span></span></button>
+    <div class="t-logo" onclick="goTo('auth')">
+      <div class="t-logo-icon"><svg viewBox="0 0 20 20"><circle cx="10" cy="5" r="2.5"/><circle cx="3" cy="15" r="2.5"/><circle cx="17" cy="15" r="2.5"/><line x1="10" y1="7.5" x2="3" y2="12.5"/><line x1="10" y1="7.5" x2="17" y2="12.5"/></svg></div>
+      Nexora
+    </div>
+    <div class="t-sep"></div>
+    <div class="t-breadcrumb">/ <span class="t-breadcrumb-current" id="p-bc-text">Мероприятия</span></div>
+    <div class="t-right">
+      <!-- Scan QR quick-access -->
+      <button class="btn btn-ghost btn-sm" onclick="openParticipantScan()" title="Сканировать QR">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="5" height="5" rx=".5"/><rect x="9" y="2" width="5" height="5" rx=".5"/><rect x="2" y="9" width="5" height="5" rx=".5"/><rect x="9" y="9" width="2" height="2"/><rect x="13" y="9" width="2" height="2"/><rect x="9" y="13" width="2" height="2"/><rect x="13" y="13" width="2" height="2"/></svg>
+        Сканировать
+      </button>
+      <div style="position:relative">
+        <div class="t-notif" onclick="toggleNotif('p-notif-dd')">
+          <svg viewBox="0 0 16 16" stroke="currentColor" stroke-width="1.5"><path d="M8 1a5 5 0 0 1 5 5v2l1 2H2l1-2V6a5 5 0 0 1 5-5z"/><path d="M6.5 13.5a1.5 1.5 0 0 0 3 0"/></svg>
+          <div class="t-notif-dot" id="p-notif-dot"></div>
+        </div>
+        <div class="notif-dropdown" id="p-notif-dd">
+          <div class="notif-header">Уведомления <span class="notif-clear" onclick="clearNotifs('p-notif-dd')">Прочитать все</span></div>
+          <div class="notif-item notif-unread"><div class="notif-item-title">Алексей Никитин хочет добавить вас</div><div class="notif-item-sub">Сбер · Director</div><div class="notif-item-time">5 мин назад</div></div>
+          <div class="notif-item notif-unread"><div class="notif-item-title">Заявка одобрена</div><div class="notif-item-sub">AI & Fintech Forum 2025</div><div class="notif-item-time">2 ч назад</div></div>
+          <div class="notif-item"><div class="notif-item-title">Напоминание о событии</div><div class="notif-item-sub">AI & Fintech Forum — завтра</div><div class="notif-item-time">1 д назад</div></div>
+        </div>
+      </div>
+      <span class="t-role participant">Участник</span>
+      <div style="position:relative">
+        <div class="t-avatar" onclick="toggleAvatarMenu('p-av-dd')">ИП</div>
+        <div class="avatar-dropdown" id="p-av-dd">
+          <div class="av-item" onclick="partTab('profile','Профиль');closeDropdowns()">👤 Мой профиль</div>
+          <div class="av-item" onclick="partTab('myqr','Мой QR-код');closeDropdowns()">⬚ Мой QR-код</div>
+          <div class="divider" style="margin:4px 0"></div>
+          <div class="av-item danger" onclick="goTo('auth')">→ Выйти</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="p-overlay" onclick="closeSidebar('p-sidebar','p-overlay')"></div>
+  <div class="sidebar" id="p-sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Overview</div>
+      <button class="s-item active" id="p-nav-events" onclick="partTab('events','Мероприятия')">
+        <svg class="s-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 1v4M11 1v4M2 7h12"/></svg>Мои мероприятия
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Networking</div>
+      <button class="s-item" id="p-nav-connections" onclick="partTab('connections','Мои связи')">
+        <svg class="s-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="6" r="2"/><circle cx="11" cy="6" r="2"/><path d="M1 14c0-2 1.8-4 4-4M15 14c0-2-1.8-4-4-4M8 10v4"/></svg>Мои связи<span class="s-badge" id="p-conn-badge">3</span>
+      </button>
+      <button class="s-item" id="p-nav-pending" onclick="partTab('pending','Запросы')">
+        <svg class="s-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>Запросы<span class="s-badge" id="p-pending-badge" style="background:var(--yellow)">1</span>
+      </button>
+      <button class="s-item" id="p-nav-activity" onclick="partTab('activity','Network Activity')">
+        <svg class="s-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 13V8l3-3 3 3 4-5"/></svg>Network Activity
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <button class="s-item" onclick="goTo('auth')">
+        <svg class="s-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 8H2M5 5l-3 3 3 3"/><path d="M7 3h5a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H7"/></svg>Выйти
+      </button>
+    </div>
+  </div>
+  <div class="layout"><div class="main">
+
+    <!-- EVENTS -->
+    <div id="part-events" class="tab-content active">
+      <div class="ph"><div class="ph-row"><div><h1>Мои мероприятия</h1><p>Текущие и предстоящие события</p></div></div><div class="ph-divider"></div></div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px">
+        <div class="kpi c-accent"><div class="kpi-label">Всего связей</div><div class="kpi-value" id="p-total-conn">3</div><div class="kpi-sub">за все события</div></div>
+        <div class="kpi c-green"><div class="kpi-label">В этом месяце</div><div class="kpi-value">2</div><div class="kpi-sub">новых контактов</div></div>
+        <div class="kpi c-purple"><div class="kpi-label">Мероприятий</div><div class="kpi-value">2</div><div class="kpi-sub">посещено</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card" style="border-left:3px solid var(--accent);cursor:pointer" onclick="partTab('event-detail','AI & Fintech Forum 2025')">
+          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;gap:8px">
+            <div>
+              <div style="font-size:15px;font-weight:700;margin-bottom:3px;font-family:var(--font-display)">AI & Fintech Forum 2025</div>
+              <div style="font-size:12px;color:var(--text-muted);font-family:var(--mono)">15 марта 2025 · Digital October, Москва</div>
+            </div>
+            <span class="badge badge-checkedin" style="flex-shrink:0">checked-in</span>
+          </div>
+          <div class="alert alert-info" style="margin-bottom:0;font-size:12px;padding:9px 12px">
+            📲 Отсканируйте QR других участников для обмена контактами
+          </div>
+          <div style="display:flex;gap:20px;margin-top:12px;align-items:center">
+            <div><div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;font-family:var(--mono)">Участников</div><div style="font-family:var(--mono);font-size:18px;font-weight:700">142</div></div>
+            <div><div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;font-family:var(--mono)">Ваших связей</div><div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent)" id="event-conn-count">3</div></div>
+          </div>
+          <div style="margin-top:12px;font-size:12px;color:var(--accent);font-weight:600">Открыть список участников →</div>
+        </div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:start;gap:8px">
+            <div><div style="font-size:15px;font-weight:700;font-family:var(--font-display)">SaaS Summit 2025</div><div style="font-size:12px;color:var(--text-muted);font-family:var(--mono)">28 апреля 2025 · Санкт-Петербург</div></div>
+            <span class="badge badge-pending">pending</span>
+          </div>
+          <div style="margin-top:10px;font-size:12px;color:var(--text-dim)">Ваша заявка рассматривается организатором</div>
+        </div>
+        <div class="card" style="border-style:dashed">
+          <div style="font-size:13px;font-weight:700;margin-bottom:4px">Открытые мероприятия</div>
+          <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px">Расширьте вашу деловую сеть</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--border)">
+            <div><div style="font-size:13px;font-weight:600">B2B Leaders Forum 2025</div><div style="font-size:12px;color:var(--text-muted)">20 мая · Москва, Сколково</div></div>
+            <button class="btn btn-ghost btn-sm" onclick="toast('Заявка отправлена','success')">Подать заявку</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVENT DETAIL — PARTICIPANTS -->
+    <div id="part-event-detail" class="tab-content">
+      <div style="margin-bottom:16px"><button class="btn btn-ghost btn-sm" onclick="partTab('events','Мероприятия')">← Назад</button></div>
+      <div class="ph">
+        <div class="ph-row">
+          <div><h1>AI & Fintech Forum 2025</h1><p>15 марта 2025 · Digital October, Москва</p></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" onclick="openParticipantScan()">📲 Сканировать QR</button>
+            <button class="btn btn-ghost btn-sm" onclick="partTab('myqr','Мой QR-код')">⬚ Мой QR</button>
+          </div>
+        </div>
+        <div class="ph-divider"></div>
+      </div>
+      <div class="alert alert-success">✓ Вы прошли check-in. Список участников открыт — сканируйте QR для обмена контактами.</div>
+      <div class="tabs">
+        <div class="tab active" id="ev-tab-attendees" onclick="evTab('attendees')">Участники (142)</div>
+        <div class="tab" id="ev-tab-network" onclick="evTab('network')">Мои связи (3)</div>
+        <div class="tab" id="ev-tab-program" onclick="evTab('program')">Программа</div>
+      </div>
+      <!-- ATTENDEES -->
+      <div id="ev-attendees" class="tab-content active">
+        <div style="margin-bottom:12px"><input class="input" placeholder="Поиск по имени или компании..." style="max-width:320px" oninput="filterAttendees(this.value)"/></div>
+        <div id="attendees-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+      <!-- NETWORK TAB -->
+      <div id="ev-network" class="tab-content">
+        <div style="display:flex;flex-direction:column;gap:8px" id="ev-my-connections"></div>
+      </div>
+      <!-- PROGRAM -->
+      <div id="ev-program" class="tab-content">
+        ${[['09:00','Регистрация и нетворкинг'],['10:00','Открытие. AI как инфраструктура бизнеса'],['11:00','Панель: Fintech 2025'],['12:30','Q&A сессия'],['13:00','Обед и нетворкинг'],['14:30','Workshops: AI в продукте'],['16:30','Питч-сессия стартапов'],['17:30','Закрытый нетворкинг'],['19:00','Завершение']].map(([t,e])=>`
+        <div style="display:flex;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)">
+          <span style="font-family:var(--mono);font-size:12px;color:var(--text-dim);flex-shrink:0;width:44px">${t}</span>
+          <span style="font-size:13px;color:var(--text-muted)">${e}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- MY CONNECTIONS -->
+    <div id="part-connections" class="tab-content">
+      <div class="ph"><div class="ph-row"><div><h1>Мои связи</h1><p>Ваша профессиональная сеть через Nexora</p></div></div><div class="ph-divider"></div></div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <input class="input" placeholder="Поиск по имени..." style="max-width:200px" oninput="filterConnections('name',this.value)"/>
+        <input class="input" placeholder="Компания..." style="max-width:160px" oninput="filterConnections('company',this.value)"/>
+        <select class="input" style="max-width:180px" onchange="filterConnections('event',this.value)">
+          <option value="">Все мероприятия</option>
+          <option>AI & Fintech Forum 2025</option>
+          <option>Fintech Winter 2024</option>
+        </select>
+        <select class="input" style="max-width:160px">
+          <option value="">Все города</option>
+          <option>Москва</option>
+          <option>Санкт-Петербург</option>
+        </select>
+      </div>
+      <div id="connections-list" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
+    <!-- PENDING REQUESTS -->
+    <div id="part-pending" class="tab-content">
+      <div class="ph"><div class="ph-row"><div><h1>Запросы на связь</h1><p>Входящие запросы от участников</p></div></div><div class="ph-divider"></div></div>
+      <div id="pending-list" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+
+    <!-- NETWORK ACTIVITY -->
+    <div id="part-activity" class="tab-content">
+      <div class="ph"><div class="ph-row"><div><h1>Network Activity</h1><p>Динамика вашей сети</p></div></div><div class="ph-divider"></div></div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+        <div class="kpi c-accent"><div class="kpi-label">Новые в этом месяце</div><div class="kpi-value">2</div></div>
+        <div class="kpi c-green"><div class="kpi-label">Новые у контактов</div><div class="kpi-value">7</div><div class="kpi-sub">в сети ваших связей</div></div>
+        <div class="kpi c-purple"><div class="kpi-label">По мероприятиям</div><div class="kpi-value">3</div><div class="kpi-sub">с AI & Fintech Forum</div></div>
+      </div>
+      <div class="g2" style="margin-bottom:20px">
+        <div class="card">
+          <div class="section-title">Связи по мероприятиям</div>
+          ${[['AI & Fintech Forum 2025',3,'var(--accent)'],['Fintech Winter 2024',0,'var(--text-dim)']].map(([ev,cnt,c])=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)">
+            <span style="font-size:13px;color:var(--text-muted)">${ev}</span>
+            <span style="font-family:var(--mono);font-weight:700;font-size:15px;color:${c}">${cnt}</span>
+          </div>`).join('')}
+        </div>
+        <div class="card">
+          <div class="section-title">Активность за месяц</div>
+          <div class="bar-chart">
+            ${[0,1,0,2,1,0,0,3,1,0,2,0,1,0,0,1,0,2,0,1,0,0,0,1,2,0,1,3,2,4].map((h,i)=>`<div class="bar" style="height:${Math.max(h*16,3)}px;background:${h>0?'var(--accent)':'var(--surface3)'};border-radius:2px 2px 0 0"></div>`).join('')}
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--text-dim);font-family:var(--mono)"><span>1 мар</span><span>15 мар</span><span>31 мар</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">Лента событий</div>
+        ${[['15 мар 10:18','Связь принята','Мария Кузнецова · Яндекс · Senior PM','AI & Fintech Forum 2025'],['15 мар 11:42','Связь принята','Ольга Смирнова · Ozon · CFO','AI & Fintech Forum 2025'],['16 мар','Запрос отправлен','Алексей Никитин · Сбер · Director','Ожидает подтверждения'],['20 мар','Связь принята','Дмитрий Волков · VK · CTO','AI & Fintech Forum 2025']].map(([d,a,p,ev])=>`
+        <div style="display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);flex-shrink:0;width:80px;padding-top:2px">${d}</div>
+          <div>
+            <div style="font-size:13px;font-weight:500">${p}</div>
+            <div style="font-size:11px;color:var(--text-dim);font-family:var(--mono)">${a} · ${ev}</div>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- MY QR -->
+    <div id="part-myqr" class="tab-content">
+      <div class="ph"><div class="ph-row"><div><h1>Мой QR-код</h1><p>Покажите для быстрого обмена контактами</p></div></div><div class="ph-divider"></div></div>
+      <div style="display:flex;justify-content:center">
+        <div style="max-width:340px;width:100%;text-align:center">
+          <div class="card">
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px;font-family:var(--font-display)">Иван Петров</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:20px">Nexora Corp · CEO</div>
+            <div style="display:flex;justify-content:center;margin-bottom:20px">
+              <div style="padding:14px;background:white;border-radius:12px;border:1px solid var(--border);display:inline-block">
+                <svg width="160" height="160" viewBox="0 0 160 160"><rect width="160" height="160" fill="white"/><g fill="#0f1120"><rect x="10" y="10" width="50" height="50"/><rect x="100" y="10" width="50" height="50"/><rect x="10" y="100" width="50" height="50"/><rect x="18" y="18" width="34" height="34" fill="white"/><rect x="108" y="18" width="34" height="34" fill="white"/><rect x="18" y="108" width="34" height="34" fill="white"/><rect x="26" y="26" width="18" height="18"/><rect x="116" y="26" width="18" height="18"/><rect x="26" y="116" width="18" height="18"/><rect x="70" y="10" width="10" height="10"/><rect x="80" y="10" width="10" height="10"/><rect x="70" y="30" width="10" height="10"/><rect x="80" y="50" width="10" height="10"/><rect x="10" y="70" width="10" height="10"/><rect x="30" y="70" width="10" height="10"/><rect x="50" y="80" width="10" height="10"/><rect x="70" y="70" width="10" height="10"/><rect x="80" y="80" width="10" height="10"/><rect x="90" y="70" width="10" height="10"/><rect x="100" y="80" width="10" height="10"/><rect x="110" y="70" width="10" height="10"/><rect x="130" y="70" width="10" height="10"/><rect x="70" y="100" width="10" height="10"/><rect x="90" y="110" width="10" height="10"/><rect x="70" y="120" width="10" height="10"/><rect x="80" y="130" width="10" height="10"/><rect x="100" y="120" width="10" height="10"/><rect x="140" y="100" width="10" height="10"/></g></svg>
+              </div>
+            </div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-bottom:16px">NX-20250315-7491</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button class="btn btn-primary" style="justify-content:center" onclick="toast('QR скачан','success')">Скачать QR PNG</button>
+              <button class="btn btn-ghost" style="justify-content:center" onclick="toast('Ссылка скопирована','success')">Скопировать ссылку</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div id="part-profile" class="tab-content">
+      <div class="ph"><div class="ph-row"><div><h1>Мой профиль</h1><p>Управление данными и настройками</p></div></div><div class="ph-divider"></div></div>
+      <div class="g2">
+        <div>
+          <!-- Network score -->
+          <div class="card" style="margin-bottom:14px">
+            <div class="score-ring-wrap">
+              <div class="score-ring">
+                <svg width="72" height="72" viewBox="0 0 72 72">
+                  <circle cx="36" cy="36" r="30" fill="none" stroke="#e4e7f0" stroke-width="6"/>
+                  <circle cx="36" cy="36" r="30" fill="none" stroke="var(--accent)" stroke-width="6" stroke-dasharray="188.5" stroke-dashoffset="60" stroke-linecap="round"/>
+                </svg>
+                <div class="score-ring-val">68</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text-dim);font-family:var(--mono);margin-bottom:4px">NETWORK SCORE</div>
+                <div style="font-size:15px;font-weight:700">Топ 35% участников</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:2px">3 связи · 2 события</div>
+              </div>
+            </div>
+          </div>
+          <!-- Stats -->
+          <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px">
+            <div class="kpi c-accent"><div class="kpi-label">Всего связей</div><div class="kpi-value">3</div></div>
+            <div class="kpi c-green"><div class="kpi-label">Этот месяц</div><div class="kpi-value">2</div></div>
+            <div class="kpi c-purple"><div class="kpi-label">С AI Forum</div><div class="kpi-value">3</div></div>
+          </div>
+          <!-- Profile form -->
+          <div class="card">
+            <div class="section-title">Основная информация</div>
+            <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:18px">
+              <div class="photo-upload" onclick="toast('Загрузка фото','info')">
+                <div class="photo-upload-icon">📷</div>
+              </div>
+              <div style="flex:1">
+                <div style="font-size:16px;font-weight:700;font-family:var(--font-display)">Иван Петров</div>
+                <div style="font-size:13px;color:var(--text-muted)">Nexora Corp · CEO</div>
+                <div style="font-size:12px;color:var(--text-dim);font-family:var(--mono);margin-top:2px">Москва</div>
+              </div>
+            </div>
+            <div class="g2">
+              <div class="ig"><label>Имя</label><input class="input" value="Иван"/></div>
+              <div class="ig"><label>Фамилия</label><input class="input" value="Петров"/></div>
+            </div>
+            <div class="ig"><label>Город</label><input class="input" value="Москва" placeholder="Москва"/></div>
+            <div class="ig"><label>Компания</label><input class="input" value="Nexora Corp"/></div>
+            <div class="ig"><label>Должность</label><input class="input" value="CEO"/></div>
+            <div class="ig">
+              <label>Интересы <span style="color:var(--text-dim);font-weight:400">(используются для рекомендаций)</span></label>
+              <div class="tag-list" id="interests-list">
+                <span class="tag removable" onclick="removeInterest(this)">AI/ML ✕</span>
+                <span class="tag removable" onclick="removeInterest(this)">Fintech ✕</span>
+                <span class="tag removable" onclick="removeInterest(this)">B2B SaaS ✕</span>
+                <input class="tag-input" placeholder="+ Добавить" onkeydown="addInterest(event,this)"/>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="toast('Профиль сохранён','success')">Сохранить изменения</button>
+          </div>
+        </div>
+        <div>
+          <!-- QR preview -->
+          <div class="card" style="margin-bottom:14px;text-align:center">
+            <div class="section-title" style="justify-content:center">Мой QR-код</div>
+            <div style="display:flex;justify-content:center;margin-bottom:12px">
+              <div style="padding:10px;background:white;border-radius:8px;border:1px solid var(--border);display:inline-block">
+                <svg width="100" height="100" viewBox="0 0 160 160"><rect width="160" height="160" fill="white"/><g fill="#0f1120"><rect x="10" y="10" width="50" height="50"/><rect x="100" y="10" width="50" height="50"/><rect x="10" y="100" width="50" height="50"/><rect x="18" y="18" width="34" height="34" fill="white"/><rect x="108" y="18" width="34" height="34" fill="white"/><rect x="18" y="108" width="34" height="34" fill="white"/><rect x="26" y="26" width="18" height="18"/><rect x="116" y="26" width="18" height="18"/><rect x="26" y="116" width="18" height="18"/></g></svg>
+              </div>
+            </div>
+            <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center" onclick="partTab('myqr','Мой QR-код')">Открыть полный QR</button>
+          </div>
+          <!-- Activity timeline -->
+          <div class="card">
+            <div class="section-title">Activity Timeline</div>
+            ${[['Мар 2025','Участие в AI & Fintech Forum'],['Мар 2025','3 деловых связи создано'],['Апр 2025','Заявка на SaaS Summit']].map(([d,e])=>`
+            <div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+              <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);flex-shrink:0;width:56px">${d}</span>
+              <span style="font-size:12px;color:var(--text-muted)">${e}</span>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div></div>
+
+  <!-- DETAIL PANEL -->
+  <div class="detail-panel" id="p-detail-panel">
+    <button class="dp-close" onclick="closePanel()">✕</button>
+    <div style="padding:22px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        <div class="pc-av large" id="dp-av">МК</div>
+        <div>
+          <div style="font-size:16px;font-weight:700;font-family:var(--font-display)" id="dp-name">Мария Кузнецова</div>
+          <div style="font-size:13px;color:var(--text-muted)" id="dp-role">Яндекс · Senior PM</div>
+          <div style="font-size:11px;color:var(--text-dim);font-family:var(--mono);margin-top:2px" id="dp-city">Москва</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap" id="dp-interests-wrap">
+        <span class="tag">AI/ML</span><span class="tag">Продукт</span>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);font-family:var(--mono);padding:8px 12px;background:var(--surface2);border-radius:8px;margin-bottom:16px" id="dp-met">
+        Вы познакомились на: AI & Fintech Forum 2025
+      </div>
+      <div class="g2" style="margin-bottom:16px">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-family:var(--mono);font-size:20px;font-weight:800;color:var(--accent)" id="dp-conn-count">12</div>
+          <div style="font-size:10px;color:var(--text-dim);font-family:var(--mono);margin-top:2px">СВЯЗЕЙ</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-family:var(--mono);font-size:20px;font-weight:800;color:var(--purple)">4</div>
+          <div style="font-size:10px;color:var(--text-dim);font-family:var(--mono);margin-top:2px">СОБЫТИЯ</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div style="display:flex;flex-direction:column;gap:8px" id="dp-actions">
+        <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center" onclick="sendConnectionRequest()">+ Добавить в Мои связи</button>
+        <button class="btn btn-ghost" style="width:100%;justify-content:center">Написать сообщение</button>
+      </div>
+      <div id="dp-tags-section" style="margin-top:16px;display:none">
+        <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;font-family:var(--mono)">МОИ ТЕГИ ДЛЯ ЭТОГО КОНТАКТА</div>
+        <div class="tag-list" id="dp-tags">
+          <span class="tag removable" onclick="removeTag(this)">партнёр ✕</span>
+          <input class="tag-input" placeholder="+ тег" onkeydown="addTag(event,this)"/>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- POST-SCAN CARD (participant QR scan result) -->
+<div class="post-scan-overlay" id="post-scan-overlay">
+  <div class="post-scan-card">
+    <div style="font-size:12px;color:var(--text-dim);font-family:var(--mono);margin-bottom:16px;text-transform:uppercase;letter-spacing:.07em">QR отсканирован</div>
+    <div class="post-scan-av" id="ps-av">МК</div>
+    <div style="font-size:18px;font-weight:800;font-family:var(--font-display);margin-bottom:4px" id="ps-name">Мария Кузнецова</div>
+    <div style="font-size:14px;color:var(--text-muted);margin-bottom:4px" id="ps-role">Яндекс · Senior PM · Москва</div>
+    <div style="font-size:12px;color:var(--text-dim);font-family:var(--mono);margin-bottom:20px" id="ps-interests">AI/ML · Продукт · SaaS</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center;font-size:16px" onclick="addFromScan()">✓ Добавить в Мои связи</button>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="closePostScan()">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<!-- PARTICIPANT SCAN QR MODAL -->
+<div class="modal-overlay" id="scan-modal">
+  <div class="modal" style="text-align:center;max-width:360px">
+    <div class="modal-title">Сканировать QR</div>
+    <div class="modal-sub">Наведите камеру на QR-код участника</div>
+    <div style="display:flex;justify-content:center;margin-bottom:20px">
+      <div class="scan-area">
+        <div style="text-align:center;z-index:1;position:relative">
+          <div style="font-size:36px;margin-bottom:6px;opacity:.4">📷</div>
+          <div style="font-size:12px;color:var(--text-dim)">Камера</div>
+        </div>
+        <div class="scan-line"></div>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center;margin-bottom:8px" onclick="simulateScan()">Симуляция сканирования</button>
+    <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="closeModal('scan-modal')">Отмена</button>
+  </div>
+</div>
+
+<!-- ══════════ ORGANIZER ══════════ -->
+<div id="screen-organizer" class="screen">
+  <div class="topbar">
+    <button class="t-hamburger" onclick="toggleSidebar('o-sidebar','o-overlay')"><span></span><span></span><span></span></button>
+    <div class="t-logo" onclick="goTo('auth')">
+      <div class="t-logo-icon"><svg viewBox="0 0 20 20"><circle cx="10" cy="5" r="2.5"/><circle cx="3" cy="15" r="2.5"/><circle cx="17" cy="15" r="2.5"/><line x1="10" y1="7.5" x2="3" y2="12.5"/><line x1="10" y1="7.5" x2="17" y2="12.5"/></svg></div>
+      Nexora
+    </div>
+    <div class="t-sep"></div>
+    <div class="t-breadcrumb">/ <span class="t-breadcrumb-current" id="o-bc-text">Dashboard</span></div>
+    <div class="t-right">
+      <div style="position:relative">
+        <div class="t-notif" onclick="toggleNotif('o-notif-dd')">
+          <svg viewBox="0 0 16 16" stroke="currentColor" stroke-width="1.5"><path d="M8 1a5 5 0 0 1 5 5v2l1 2H2l1-2V6a5 5 0 0 1 5-5z"/><path d="M6.5 13.5a1.5 1.5 0 0 0 3 0"/></svg>
+          <div class="t-notif-dot" id="o-notif-dot"></div>
+        </div>
+        <div class="notif-dropdown" id="o-notif-dd">
+          <div class="notif-header">Уведомления <span class="notif-clear" onclick="clearNotifs('o-notif-dd')">Прочитать все</span></div>
+          <div class="notif-item notif-unread"><div class="notif-item-title">12 новых заявок</div><div class="notif-item-sub">AI & Fintech Forum 2025</div><div class="notif-item-time">1 ч назад</div></div>
+          <div class="notif-item"><div class="notif-item-title">Check-in запущен</div><div class="notif-item-sub">142 из 186 вошли</div><div class="notif-item-time">3 ч назад</div></div>
+        </div>
+      </div>
+      <span class="t-role organizer">Организатор</span>
+      <div style="position:relative">
+        <div class="t-avatar" onclick="toggleAvatarMenu('o-av-dd')">ЕК</div>
+        <div class="avatar-dropdown" id="o-av-dd">
+          <div class="av-item danger" onclick="goTo('auth')">→ Выйти</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="o-overlay" onclick="closeSidebar('o-sidebar','o-overlay')"></div>
+  <div class="sidebar" id="o-sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Overview</div>
+      <button class="s-item active" id="o-nav-dashboard" onclick="orgTab('dashboard','Dashboard')">
+        <svg class="s-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>Dashboard
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Events</div>
+      <button class="s-item" id="o-nav-registrations" onclick="orgTab('registrations','Участники')">
+        <svg class="s-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h8M2 12h6"/></svg>All Participants<span class="s-badge" id="o-badge">12</span>
+      </button>
+      <button class="s-item" id="o-nav-checkin" onclick="orgTab('checkin','Check-in')">
+        <svg class="s-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8l4 4 8-8"/></svg>Check-in
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Network</div>
+      <button class="s-item" id="o-nav-network" onclick="orgTab('network','Network Analytics')">
+        <svg class="s-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="8" r="2"/><circle cx="13" cy="4" r="1.5"/><circle cx="13" cy="12" r="1.5"/><path d="M7 8l4.5-3.5M7 8l4.5 3.5"/></svg>Network Analytics
+      </button>
+      <button class="s-item" id="o-nav-analytics" onclick="orgTab('analytics','Event Analytics')">
+        <svg class="s-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 13V8l3-3 3 3 4-5"/></svg>Event Analytics
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <button class="s-item" onclick="goTo('org-scan')">
+        <svg class="s-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="5" height="5" rx=".5"/><rect x="9" y="2" width="5" height="5" rx=".5"/><rect x="2" y="9" width="5" height="5" rx=".5"/><rect x="9" y="9" width="2" height="2"/></svg>QR Сканер
+      </button>
+      <button class="s-item" onclick="goTo('auth')">
+        <svg class="s-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 8H2M5 5l-3 3 3 3"/><path d="M7 3h5a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H7"/></svg>Выйти
+      </button>
+    </div>
+  </div>
+  <div class="layout"><div class="main">
+
+    <!-- ORG DASHBOARD -->
+    <div id="org-dashboard" class="tab-content active">
+      <div class="ph">
+        <div class="ph-row">
+          <div><h1>AI & Fintech Forum 2025</h1><p>15 марта 2025 · Digital October · <span class="live-dot"></span> <span style="color:var(--green);font-size:12px;font-family:var(--mono)">Active</span></p></div>
+          <button class="btn btn-primary btn-sm" onclick="orgTab('checkin','Check-in')">↗ Check-in</button>
+        </div>
+        <div class="ph-divider"></div>
+      </div>
+      <!-- EVENT HEALTH FIRST -->
+      <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;font-family:var(--mono);font-weight:700;margin-bottom:10px">Event Health</div>
+      <div class="kpi-grid" style="margin-bottom:20px">
+        <div class="kpi"><div class="kpi-label">Зарегистрировано</div><div class="kpi-value">248</div><div class="kpi-sub"><span class="kpi-trend up">↑ 18</span> за сегодня</div></div>
+        <div class="kpi c-accent"><div class="kpi-label">Подтверждено</div><div class="kpi-value">186</div><div class="kpi-sub">75% от заявок</div></div>
+        <div class="kpi c-green"><div class="kpi-label">Прошли Check-in</div><div class="kpi-value" id="s-checkin">142</div><div class="kpi-sub">76% явка</div></div>
+        <div class="kpi"><div class="kpi-label">No-show</div><div class="kpi-value" style="color:var(--red)">44</div><div class="kpi-sub">24%</div></div>
+      </div>
+      <!-- NETWORK INTELLIGENCE SECOND -->
+      <div style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;font-family:var(--mono);font-weight:700;margin-bottom:10px;margin-top:4px">Network Intelligence</div>
+      <div class="kpi-grid" style="margin-bottom:20px">
+        <div class="kpi c-accent"><div class="kpi-label">Connections Created</div><div class="kpi-value">89</div><div class="kpi-sub"><span class="kpi-trend up">↑ 12</span> за сегодня</div></div>
+        <div class="kpi c-purple"><div class="kpi-label">Conn. / Attendee</div><div class="kpi-value">0.63</div><div class="kpi-sub"><span class="kpi-trend up">↑ цель 0.5 ✓</span></div></div>
+        <div class="kpi c-green"><div class="kpi-label">Post-Event 7d</div><div class="kpi-value">34</div><div class="kpi-sub">38% от total</div></div>
+        <div class="kpi"><div class="kpi-label">Repeat Rate</div><div class="kpi-value" style="color:var(--yellow)">23%</div><div class="kpi-sub">повторные контакты</div></div>
+      </div>
+      <!-- Network retention -->
+      <div class="kpi-grid" style="grid-template-columns:1fr 1fr;margin-bottom:20px">
+        <div class="kpi c-green"><div class="kpi-label">Создали ≥1 связь</div><div class="kpi-value">67%</div><div style="margin-top:10px"><div class="progress-bar"><div class="progress-fill" style="width:67%;background:var(--green)"></div></div></div></div>
+        <div class="kpi c-purple"><div class="kpi-label">Повторные контакты</div><div class="kpi-value">23%</div><div style="margin-top:10px"><div class="progress-bar"><div class="progress-fill" style="width:23%;background:var(--purple)"></div></div></div></div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="section-title">Последние заявки <button class="btn btn-ghost btn-sm" onclick="orgTab('registrations','Участники')">Все →</button></div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody>
+              <tr><td style="padding:9px 0;border-bottom:1px solid var(--border)"><strong>Анна Соколова</strong><br><span style="font-size:11px;font-family:var(--mono);color:var(--text-dim)">Сбер · CPO</span></td><td style="padding:9px 0;border-bottom:1px solid var(--border)"><span class="badge badge-pending">pending</span></td><td style="padding:9px 0;border-bottom:1px solid var(--border)"><button class="btn btn-success btn-sm" onclick="approveRow(this,'Анна Соколова')">Принять</button></td></tr>
+              <tr><td style="padding:9px 0;border-bottom:1px solid var(--border)"><strong>Дмитрий Волков</strong><br><span style="font-size:11px;font-family:var(--mono);color:var(--text-dim)">VK · CTO</span></td><td style="padding:9px 0;border-bottom:1px solid var(--border)"><span class="badge badge-approved">approved</span></td><td style="padding:9px 0;border-bottom:1px solid var(--border)"><button class="btn btn-ghost btn-sm">Детали</button></td></tr>
+              <tr><td style="padding:9px 0"><strong>Мария Кузнецова</strong><br><span style="font-size:11px;font-family:var(--mono);color:var(--text-dim)">Яндекс · PM</span></td><td style="padding:9px 0"><span class="badge badge-checkedin">checked-in</span></td><td style="padding:9px 0"><button class="btn btn-ghost btn-sm">Детали</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="section-title">Топ-5 по нетворкингу</div>
+          ${[['МК','Мария Кузнецова','Яндекс',12],['ОС','Ольга Смирнова','Ozon',9],['ДВ','Дмитрий Волков','VK',8],['АС','Анна Соколова','Сбер',7],['НК','Никита Козлов','Мегафон',6]].map(([av,n,c,cnt],i)=>`
+          <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+            <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);width:16px">#${i+1}</span>
+            <div class="pc-av" style="width:26px;height:26px;font-size:10px">${av}</div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:500">${n}</div><div style="font-size:11px;color:var(--text-muted)">${c}</div></div>
+            <span class="conn-pill">${cnt}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- REGISTRATIONS -->
+    <div id="org-registrations" class="tab-content">
+      <div class="ph"><div class="ph-row"><div><h1>All Participants</h1><p>Управление заявками</p></div><div style="display:flex;gap:8px"><button class="btn btn-success btn-sm" id="bulk-approve-btn" style="display:none" onclick="bulkApprove()">Одобрить (<span id="sel-count">0</span>)</button><button class="btn btn-ghost btn-sm" onclick="exportCSV()">↓ CSV</button></div></div><div class="ph-divider"></div></div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+        <input class="input" placeholder="Поиск..." style="max-width:220px" oninput="filterRegs(this.value)"/>
+        <select class="input" style="max-width:150px" onchange="filterRegs('',this.value)"><option value="">Все статусы</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="checkedin">Checked-in</option></select>
+        <select class="input" style="max-width:180px"><option value="">Все (connections)</option><option value="connected">Создали связь</option><option value="none">Не создали</option></select>
+        <div style="margin-left:auto;font-size:12px;color:var(--text-muted);font-family:var(--mono)">248 · <span style="color:var(--yellow)">12 ожидают</span></div>
+      </div>
+      <div class="card" style="padding:0">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th class="checkbox-col"><input type="checkbox" id="select-all" onchange="selectAll(this)"/></th><th class="sortable">Участник</th><th>Компания</th><th class="sortable">Статус</th><th class="sortable">Connections</th><th>Дата</th><th>Действие</th></tr></thead>
+            <tbody id="reg-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHECK-IN -->
+    <div id="org-checkin" class="tab-content">
+      <div class="ph"><div class="ph-row"><div><h1>Check-in</h1><p>Real-time управление входом</p></div><button class="btn btn-primary btn-sm" onclick="goTo('org-scan')">↗ QR Сканер</button></div><div class="ph-divider"></div></div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+        <div class="kpi c-accent"><div class="kpi-label">Approved</div><div class="kpi-value">186</div></div>
+        <div class="kpi c-green"><div class="kpi-label">Вошли</div><div class="kpi-value" id="ci-count">142</div><div style="margin-top:8px"><div class="progress-bar"><div class="progress-fill" style="width:76%;background:var(--green)"></div></div></div><div class="kpi-sub">76% явка</div></div>
+        <div class="kpi"><div class="kpi-label">No-show</div><div class="kpi-value" style="color:var(--red)">44</div><div class="kpi-sub">24%</div></div>
+      </div>
+      <div class="card card-sm" style="margin-bottom:16px">
+        <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:8px;font-family:var(--mono)">Ручной check-in</div>
+        <div style="display:flex;gap:8px">
+          <input class="input" id="manual-search" placeholder="Начните вводить имя..." style="flex:1" oninput="manualSearch(this.value)"/>
+          <button class="btn btn-primary btn-sm" onclick="manualCheckin()">Отметить вход</button>
+        </div>
+        <div id="manual-results" style="margin-top:8px;display:none"></div>
+      </div>
+      <div class="card" style="padding:0">
+        <div style="padding:12px 14px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text-muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.07em">Последние 10 вошедших</div>
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr><th>Участник</th><th>Компания</th><th>Время</th><th>Статус</th></tr></thead>
+          <tbody id="ci-tbody">
+            ${[['МК','Мария Кузнецова','Яндекс','09:14'],['ОС','Ольга Смирнова','Ozon','09:22'],['ИП','Игорь Петров','Т-Банк','09:31'],['АС','Анна Соколова','Сбер','09:38'],['НК','Никита Козлов','Мегафон','09:44']].map(([a,n,c,t])=>`<tr><td><strong>${n}</strong></td><td style="font-size:12px">${c}</td><td style="font-family:var(--mono);font-size:11px">${t}</td><td><span class="badge badge-checkedin">✓</span></td></tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- NETWORK ANALYTICS -->
+    <div id="org-network" class="tab-content">
+      <div class="ph"><div class="ph-row"><div><h1>Network Analytics</h1><p>AI & Fintech Forum 2025</p></div></div><div class="ph-divider"></div></div>
+      <div class="kpi-grid" style="margin-bottom:20px">
+        <div class="kpi c-accent"><div class="kpi-label">Network Density</div><div class="kpi-value">0.42</div><div class="kpi-sub">плотность графа</div></div>
+        <div class="kpi c-purple"><div class="kpi-label">Average Degree</div><div class="kpi-value">3.8</div><div class="kpi-sub">связей на узел</div></div>
+        <div class="kpi c-green"><div class="kpi-label">Clusters</div><div class="kpi-value">7</div></div>
+        <div class="kpi"><div class="kpi-label">Isolated Nodes</div><div class="kpi-value" style="color:var(--red)">8%</div></div>
+      </div>
+      <div class="g2" style="margin-bottom:16px">
+        <div class="card">
+          <div class="section-title">Event-level Metrics</div>
+          ${[['Total Connections','89','var(--accent)'],['Connections / Attendee','0.63','var(--purple)'],['% Active Participants','67%','var(--green)'],['Accepted Rate','74%','var(--text)']].map(([l,v,c])=>`
+          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted);font-size:13px">${l}</span><span style="font-family:var(--mono);font-weight:700;color:${c};font-size:16px">${v}</span></div>`).join('')}
+        </div>
+        <div class="card">
+          <div class="section-title">Post-Event Retention</div>
+          ${[['7-day connections','34','var(--accent)',38],['30-day connections','61','var(--green)',69],['Repeat connections','23%','var(--purple)',23]].map(([l,v,c,p])=>`
+          <div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span style="font-size:12px;color:var(--text-muted)">${l}</span><span style="font-family:var(--mono);font-weight:700;color:${c}">${v}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${p}%;background:${c}"></div></div></div>`).join('')}
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">Топ-10 активных участников</div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Участник</th><th>Компания</th><th>Connections</th><th>Network Score</th></tr></thead>
+            <tbody>${[['МК','Мария Кузнецова','Яндекс',12,94],['ОС','Ольга Смирнова','Ozon',9,87],['ДВ','Дмитрий Волков','VK',8,81],['АС','Анна Соколова','Сбер',7,76],['НК','Никита Козлов','Мегафон',6,70]].map(([av,n,c,conn,score],i)=>`
+            <tr><td style="font-family:var(--mono);color:var(--text-dim)">${i+1}</td><td><div style="display:flex;align-items:center;gap:8px"><div class="pc-av" style="width:26px;height:26px;font-size:10px">${av}</div><strong>${n}</strong></div></td><td style="font-size:12px">${c}</td><td><span class="conn-pill">${conn}</span></td><td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;min-width:60px"><div class="progress-bar"><div class="progress-fill" style="width:${score}%;background:var(--accent)"></div></div></div><span style="font-family:var(--mono);font-size:11px;color:var(--text-muted)">${score}</span></div></td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVENT ANALYTICS (with bar chart moved here) -->
+    <div id="org-analytics" class="tab-content">
+      <div class="ph"><div class="ph-row"><div><h1>Event Analytics</h1><p>AI & Fintech Forum 2025</p></div><button class="btn btn-ghost btn-sm" onclick="exportCSV()">↓ Отчёт</button></div><div class="ph-divider"></div></div>
+      <div class="kpi-grid" style="margin-bottom:20px">
+        <div class="kpi"><div class="kpi-label">Зарегистрировано</div><div class="kpi-value">248</div></div>
+        <div class="kpi c-accent"><div class="kpi-label">Подтверждено</div><div class="kpi-value">186</div></div>
+        <div class="kpi c-green"><div class="kpi-label">Checked-in</div><div class="kpi-value">142</div><div class="kpi-sub">76% явка</div></div>
+        <div class="kpi c-yellow"><div class="kpi-label">Connections</div><div class="kpi-value">89</div></div>
+      </div>
+      <!-- BAR CHART moved here from Dashboard -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="section-title">Явка по часам</div>
+        <div class="bar-chart">
+          ${[4,12,28,48,70,88,100,95,80,64,46,28].map((h,i)=>`<div class="bar" style="height:${h}%;background:${i>=4&&i<=6?'var(--accent)':'var(--surface3)'}" title="${9+i}:00"></div>`).join('')}
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--text-dim);font-family:var(--mono)"><span>09:00</span><span>14:00</span><span>20:00</span></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Event Log</div>
+        ${[['09:14','check_in','Мария Кузнецова','forum25'],['09:22','check_in','Ольга Смирнова','forum25'],['10:05','connection_request','Петров → Кузнецова','forum25'],['10:18','connection_accepted','Петров ↔ Кузнецова','7m 52s'],['11:34','connection_request','Смирнова → Волков','forum25'],['13:18','connection_rejected','Кузнецова ✗ Никитин','—']].map(([t,a,d,m])=>`
+        <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border)">
+          <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);flex-shrink:0;width:44px">${t}</span>
+          <span style="font-size:11px;padding:2px 8px;border-radius:4px;background:var(--accent-light);color:var(--accent);font-family:var(--mono);flex-shrink:0">${a}</span>
+          <span style="font-size:12px;color:var(--text-muted);flex:1">${d}</span>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">${m}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+
+  </div></div>
+</div>
+
+<!-- ══════════ ADMIN ══════════ -->
+<div id="screen-admin" class="screen">
+  <div class="topbar">
+    <button class="t-hamburger" onclick="toggleSidebar('a-sidebar','a-overlay')"><span></span><span></span><span></span></button>
+    <div class="t-logo" onclick="goTo('auth')">
+      <div class="t-logo-icon"><svg viewBox="0 0 20 20"><circle cx="10" cy="5" r="2.5"/><circle cx="3" cy="15" r="2.5"/><circle cx="17" cy="15" r="2.5"/><line x1="10" y1="7.5" x2="3" y2="12.5"/><line x1="10" y1="7.5" x2="17" y2="12.5"/></svg></div>
+      Nexora
+    </div>
+    <div class="t-sep"></div>
+    <div class="t-breadcrumb">/ <span class="t-breadcrumb-current" id="a-bc-text">All Events</span></div>
+    <div class="t-right">
+      <span class="t-role admin">Super Admin</span>
+      <div style="position:relative">
+        <div class="t-avatar" onclick="toggleAvatarMenu('a-av-dd')">NX</div>
+        <div class="avatar-dropdown" id="a-av-dd">
+          <div class="av-item danger" onclick="goTo('auth')">→ Выйти</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-overlay" id="a-overlay" onclick="closeSidebar('a-sidebar','a-overlay')"></div>
+  <div class="sidebar" id="a-sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Events</div>
+      <button class="s-item active" id="a-nav-events" onclick="adminTab('events','All Events')">
+        <svg class="s-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M5 1v4M11 1v4M2 7h12"/></svg>All Events
+      </button>
+      <button class="s-item" id="a-nav-create-event" onclick="adminTab('create-event','Create Event')">
+        <svg class="s-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v12M2 8h12"/></svg>Create Event
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Platform</div>
+      <button class="s-item" id="a-nav-global" onclick="adminTab('global','Cross-Event Analytics')">
+        <svg class="s-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 2a9 9 0 0 1 0 12M2 8h12"/></svg>Cross-Event
+      </button>
+      <button class="s-item" id="a-nav-users" onclick="adminTab('users','Team Access')">
+        <svg class="s-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>Team Access
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <button class="s-item" onclick="goTo('auth')"><svg class="s-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 8H2M5 5l-3 3 3 3"/><path d="M7 3h5a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H7"/></svg>Выйти</button>
+    </div>
+  </div>
+  <div class="layout"><div class="main">
+    <div id="admin-events" class="tab-content active">
+      <div class="ph"><div class="ph-row"><div><h1>All Events</h1></div><button class="btn btn-primary btn-sm" onclick="adminTab('create-event','Create Event')">+ Создать</button></div><div class="ph-divider"></div></div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+        <div class="kpi"><div class="kpi-label">Всего событий</div><div class="kpi-value">4</div></div>
+        <div class="kpi c-green"><div class="kpi-label">Active</div><div class="kpi-value">2</div></div>
+        <div class="kpi c-accent"><div class="kpi-label">Total Connections</div><div class="kpi-value">312</div></div>
+      </div>
+      <div class="card" style="padding:0">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Название</th><th>Организатор</th><th>Дата</th><th>Участников</th><th>Connections</th><th>Статус</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><strong>AI & Fintech Forum 2025</strong><br><span style="font-size:11px;color:var(--text-dim)">Digital October, Москва</span></td><td style="font-size:12px">Елена Кравцова</td><td style="font-family:var(--mono);font-size:11px">15 мар 2025</td><td style="font-family:var(--mono)">248/300</td><td><span class="conn-pill">89</span></td><td><span class="badge badge-active">active</span></td><td><button class="btn btn-ghost btn-sm">Управление</button></td></tr>
+            <tr><td><strong>SaaS Summit 2025</strong><br><span style="font-size:11px;color:var(--text-dim)">Санкт-Петербург</span></td><td style="font-size:12px">Артём Воронов</td><td style="font-family:var(--mono);font-size:11px">28 апр 2025</td><td style="font-family:var(--mono)">87/200</td><td><span class="conn-pill">41</span></td><td><span class="badge badge-active">active</span></td><td><button class="btn btn-ghost btn-sm">Управление</button></td></tr>
+            <tr><td><strong>B2B Leaders Forum</strong><br><span style="font-size:11px;color:var(--text-dim)">Москва, Сколково</span></td><td style="font-size:12px">Nexora Team</td><td style="font-family:var(--mono);font-size:11px">20 май 2025</td><td style="font-family:var(--mono)">12/150</td><td><span class="conn-pill">11</span></td><td><span class="badge badge-draft">draft</span></td><td><button class="btn btn-ghost btn-sm">Редактировать</button></td></tr>
+            <tr><td><strong>Fintech Winter 2024</strong><br><span style="font-size:11px;color:var(--text-dim)">Москва</span></td><td style="font-size:12px">Елена Кравцова</td><td style="font-family:var(--mono);font-size:11px">10 дек 2024</td><td style="font-family:var(--mono)">194/200</td><td><span class="conn-pill">71</span></td><td><span class="badge badge-closed">closed</span></td><td><button class="btn btn-ghost btn-sm">Аналитика</button></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+    <div id="admin-create-event" class="tab-content">
+      <div style="margin-bottom:16px"><button class="btn btn-ghost btn-sm" onclick="adminTab('events','All Events')">← Назад</button></div>
+      <div class="ph"><h1>Create Event</h1></div>
+      <div style="max-width:640px"><div class="card">
+        <div class="ig"><label>Название<span class="req">*</span></label><input class="input" id="ev-title" placeholder="AI & Fintech Forum 2025"/><div class="field-error" id="ev-title-err">Обязательное поле</div></div>
+        <div class="ig"><label>Описание</label><textarea class="input" rows="3" placeholder="Краткое описание..."></textarea></div>
+        <div class="g2"><div class="ig"><label>Дата<span class="req">*</span></label><input class="input" type="date" id="ev-date"/></div><div class="ig"><label>Время</label><input class="input" type="time" value="09:00"/></div></div>
+        <div class="ig"><label>Локация<span class="req">*</span></label><input class="input" id="ev-loc" placeholder="Москва, Digital October"/><div class="field-error" id="ev-loc-err">Обязательное поле</div></div>
+        <div class="g2"><div class="ig"><label>Организатор</label><select class="input"><option>Елена Кравцова</option><option>Артём Воронов</option></select></div><div class="ig"><label>Статус</label><select class="input"><option>draft</option><option>active</option></select></div></div>
+        <div style="display:flex;gap:8px"><button class="btn btn-primary" onclick="createEvent()">Создать</button><button class="btn btn-ghost" onclick="adminTab('events','All Events')">Отмена</button></div>
+      </div></div>
+    </div>
+    <div id="admin-global" class="tab-content">
+      <div class="ph"><h1>Cross-Event Intelligence</h1><div class="ph-divider"></div></div>
+      <div class="kpi-grid" style="margin-bottom:20px">
+        <div class="kpi"><div class="kpi-label">Пользователей</div><div class="kpi-value">541</div><div class="kpi-sub"><span class="kpi-trend up">↑ 12%</span> МоМ</div></div>
+        <div class="kpi c-accent"><div class="kpi-label">Событий</div><div class="kpi-value">4</div></div>
+        <div class="kpi c-green"><div class="kpi-label">Total Connections</div><div class="kpi-value">312</div><div class="kpi-sub"><span class="kpi-trend up">↑ 31%</span></div></div>
+        <div class="kpi c-purple"><div class="kpi-label">Avg Conn/Event</div><div class="kpi-value">78</div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="section-title">ROI по событиям</div>${[['AI & Fintech Forum','89','0.63'],['Fintech Winter 2024','71','0.57'],['SaaS Summit 2025','41','0.47'],['B2B Leaders Forum','11','0.28']].map(([n,c,r],i)=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-family:var(--mono);font-size:11px;color:var(--text-dim);width:18px">#${i+1}</span><div style="flex:1"><div style="font-size:13px;font-weight:500;margin-bottom:3px">${n}</div><div class="progress-bar"><div class="progress-fill" style="width:${[100,80,46,12][i]}%;background:var(--accent)"></div></div></div><span class="conn-pill">${c}</span></div>`).join('')}</div>
+        <div class="card"><div class="section-title">Cross-Event Intel</div>${[['Overlap участников','47','в 2+ событиях','var(--accent)'],['Repeat Attendance','31%','возвращаемость','var(--green)'],['Repeat Clusters','12','устойчивых кластеров','var(--purple)']].map(([l,v,d,c])=>`<div style="padding:10px 0;border-bottom:1px solid var(--border)"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:13px;color:var(--text-muted)">${l}</span><span style="font-family:var(--mono);font-size:18px;font-weight:800;color:${c}">${v}</span></div><div style="font-size:11px;color:var(--text-dim)">${d}</div></div>`).join('')}</div>
+      </div>
+    </div>
+    <div id="admin-users" class="tab-content">
+      <div class="ph"><h1>Team Access</h1></div>
+      <div class="card" style="padding:0"><div class="tbl-wrap"><table>
+        <thead><tr><th>Пользователь</th><th>Компания</th><th>Роль</th><th>Событий</th><th>Connections</th><th></th></tr></thead>
+        <tbody>${[['ЕК','Елена Кравцова','Events Co.','organizer',3,48],['ИП','Иван Петров','Nexora Corp','participant',2,3],['МК','Мария Кузнецова','Яндекс','participant',4,12],['ДВ','Дмитрий Волков','VK','participant',3,8]].map(([av,n,c,r,ev,cn])=>`<tr><td><div style="display:flex;align-items:center;gap:8px"><div class="pc-av" style="width:26px;height:26px;font-size:10px">${av}</div><strong>${n}</strong></div></td><td style="font-size:12px">${c}</td><td><select class="input" style="padding:3px 7px;font-size:11px;height:auto;width:auto;font-family:var(--mono)"><option ${r==='participant'?'selected':''}>participant</option><option ${r==='organizer'?'selected':''}>organizer</option><option ${r==='admin'?'selected':''}>admin</option></select></td><td style="font-family:var(--mono)">${ev}</td><td><span class="conn-pill">${cn}</span></td><td><button class="btn btn-ghost btn-sm">Профиль</button></td></tr>`).join('')}</tbody>
+      </table></div></div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ══════════ ORG SCAN ══════════ -->
+<div id="screen-org-scan" class="screen">
+  <div class="topbar">
+    <div class="t-logo" onclick="goTo('auth')"><div class="t-logo-icon"><svg viewBox="0 0 20 20"><circle cx="10" cy="5" r="2.5"/><circle cx="3" cy="15" r="2.5"/><circle cx="17" cy="15" r="2.5"/><line x1="10" y1="7.5" x2="3" y2="12.5"/><line x1="10" y1="7.5" x2="17" y2="12.5"/></svg></div>Nexora</div>
+    <div class="t-sep"></div>
+    <div class="t-breadcrumb">/ <span style="color:var(--text-muted)">Check-in Scanner</span></div>
+    <div class="t-right"><button class="btn btn-ghost btn-sm" onclick="goTo('organizer')">← Dashboard</button></div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center;min-height:calc(100vh - var(--topbar-h));padding:24px;margin-top:var(--topbar-h);background:var(--bg)">
+    <div style="width:100%;max-width:420px">
+      <div style="text-align:center;margin-bottom:22px">
+        <div style="font-family:var(--font-display);font-size:20px;font-weight:800;margin-bottom:4px">Check-in Scanner</div>
+        <div style="font-size:13px;color:var(--text-muted)">AI & Fintech Forum 2025</div>
+      </div>
+      <div style="display:flex;justify-content:center;margin-bottom:18px;position:relative">
+        <div class="scan-area">
+          <div style="text-align:center;position:relative;z-index:1"><div style="font-size:36px;opacity:.35;margin-bottom:6px">📷</div><div style="font-size:12px;color:var(--text-dim)">Камера</div></div>
+          <div class="scan-line"></div>
+          <div class="scan-result" id="scan-overlay" style="border-radius:14px">
+            <div style="font-size:40px" id="sr-icon">✓</div>
+            <div style="font-size:14px;font-weight:700" id="sr-title">Допущен</div>
+            <div style="font-size:12px;opacity:.8" id="sr-sub">Анна Соколова · Сбер</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+        <div style="text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;box-shadow:var(--shadow)"><div style="font-family:var(--mono);font-size:22px;font-weight:800;color:var(--green)" id="scan-ci-count">142</div><div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;font-family:var(--mono);margin-top:3px">Вошли</div></div>
+        <div style="text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;box-shadow:var(--shadow)"><div style="font-family:var(--mono);font-size:22px;font-weight:800;color:var(--accent)">186</div><div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;font-family:var(--mono);margin-top:3px">Approved</div></div>
+        <div style="text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;box-shadow:var(--shadow)"><div style="font-family:var(--mono);font-size:22px;font-weight:800;color:var(--red)" id="scan-deny-count">0</div><div style="font-size:9px;color:var(--text-dim);text-transform:uppercase;font-family:var(--mono);margin-top:3px">Отказов</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        <button class="btn btn-success" style="justify-content:center" onclick="scanResult('ok')">✓ Допущен</button>
+        <button class="btn btn-danger" style="justify-content:center" onclick="scanResult('fail')">✗ Отказ</button>
+      </div>
+      <div class="card" style="padding:0">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;color:var(--text-muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.07em">Последние входы</div>
+        <table style="width:100%;border-collapse:collapse"><tbody id="scan-log">
+          <tr><td style="padding:8px 14px;font-family:var(--mono);font-size:11px;color:var(--text-dim);width:48px">09:38</td><td style="padding:8px 14px;font-size:13px"><strong>Анна Соколова</strong><br><span style="font-size:11px;color:var(--text-muted)">Сбер</span></td><td style="padding:8px 14px;text-align:right"><span style="color:var(--green);font-size:12px;font-family:var(--mono);font-weight:700">● OK</span></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCAN RESULT (reused) -->
+<style>
+.scan-result{display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:10px;font-weight:600}
+.scan-result.open{display:flex;animation:fadeIn .2s ease}
+.scan-result.ok{background:rgba(15,186,122,.15);color:var(--green)}
+.scan-result.fail{background:var(--red-dim);color:var(--red)}
+</style>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Подтверждение</div>
+    <div class="modal-sub" id="modal-sub">Вы уверены?</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('confirm-modal')">Отмена</button>
+      <button class="btn btn-danger btn-sm" onclick="modalConfirm()">Подтвердить</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── SUPABASE ───
+const { createClient } = supabase;
+const db = createClient(
+  'https://tzvmmjwcmvazqqpichri.supabase.co',
+  'sb_publishable_udOwdgPEEfDqBs8-F_GlIg_dN4U9RWg'
+);
+
+// ─── STATE ───
+const STATE = {
+  ciCount: 0,
+  denyCount: 0,
+  modalCallback: null,
+  sortCol: null,
+  sortDir: 'asc',
+  selectedRows: new Set(),
+  currentUser: null,
+  currentProfile: null,
+  currentEventId: null,
+};
+
+const MY_CONNECTIONS = [
+  {id:1,init:'МК',name:'Мария Кузнецова',company:'Яндекс',role:'Senior PM',city:'Москва',event:'AI & Fintech Forum 2025',interests:['AI/ML','Продукт'],connections:12,tags:['партнёр']},
+  {id:2,init:'ОС',name:'Ольга Смирнова',company:'Ozon',role:'CFO',city:'Москва',event:'AI & Fintech Forum 2025',interests:['Fintech','Инвестиции'],connections:9,tags:[]},
+  {id:3,init:'ДВ',name:'Дмитрий Волков',company:'VK',role:'CTO',city:'Санкт-Петербург',event:'AI & Fintech Forum 2025',interests:['AI/ML','Tech'],connections:8,tags:[]},
+];
+
+const PENDING_REQUESTS = [
+  {id:1,init:'АН',name:'Алексей Никитин',company:'Сбер',role:'Director',event:'AI & Fintech Forum 2025',interests:['Fintech','Banking']},
+];
+
+const ATTENDEES_DATA = [
+  {id:1,init:'МК',name:'Мария Кузнецова',company:'Яндекс',role:'Senior PM',city:'Москва',connections:12,interests:['AI/ML','Продукт']},
+  {id:2,init:'ОС',name:'Ольга Смирнова',company:'Ozon',role:'CFO',city:'Москва',connections:9,interests:['Fintech','Инвестиции']},
+  {id:3,init:'ДВ',name:'Дмитрий Волков',company:'VK',role:'CTO',city:'Санкт-Петербург',connections:8,interests:['AI/ML','Tech']},
+  {id:4,init:'АС',name:'Анна Соколова',company:'Сбер',role:'CPO',city:'Москва',connections:7,interests:['Product','Fintech']},
+  {id:5,init:'НК',name:'Никита Козлов',company:'Мегафон',role:'Director',city:'Москва',connections:6,interests:['B2B','SaaS']},
+  {id:6,init:'АН',name:'Алексей Никитин',company:'Сбер',role:'Director',city:'Москва',connections:5,interests:['Fintech']},
+  {id:7,init:'МП',name:'Максим Попов',company:'Kaspersky',role:'VP Sales',city:'Москва',connections:4,interests:['Security','B2B']},
+  {id:8,init:'ИП',name:'Игорь Петров',company:'Т-Банк',role:'VP',city:'Москва',connections:2,interests:['Banking']},
+];
+
+const REGS = [
+  {id:1,name:'Анна Соколова',company:'Сбер',role:'CPO',status:'pending',date:'2025-03-01',connections:0},
+  {id:2,name:'Дмитрий Волков',company:'VK',role:'CTO',status:'approved',date:'2025-03-02',connections:5},
+  {id:3,name:'Мария Кузнецова',company:'Яндекс',role:'Senior PM',status:'checkedin',date:'2025-03-01',connections:12},
+  {id:4,name:'Ольга Смирнова',company:'Ozon',role:'CFO',status:'checkedin',date:'2025-02-28',connections:9},
+  {id:5,name:'Игорь Петров',company:'Т-Банк',role:'VP',status:'checkedin',date:'2025-02-27',connections:4},
+  {id:6,name:'Никита Козлов',company:'Мегафон',role:'Director',status:'approved',date:'2025-03-03',connections:6},
+  {id:7,name:'Елена Морозова',company:'MTS',role:'CDO',status:'pending',date:'2025-03-04',connections:0},
+  {id:8,name:'Артём Воронов',company:'SaaS Club',role:'CEO',status:'approved',date:'2025-03-01',connections:3},
+];
+
+// ─── NAVIGATION ───
+function goTo(screen) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('screen-'+screen);
+  if(el) el.classList.add('active');
+  window.scrollTo(0,0);
+  closeDropdowns();
+}
+
+// ─── AUTH ───
+async function doLogin(forcedRole) {
+  const email = document.getElementById('auth-email').value.trim();
+  const passwordEl = document.querySelector('#screen-auth input[type=password]');
+  const password = passwordEl ? passwordEl.value : '';
+
+  if (!email) { toast('Введите email', 'error'); return; }
+
+  // Показываем загрузку
+  const btn = document.querySelector('#screen-auth .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = 'Входим...'; }
+
+  try {
+    // Пробуем войти
+    let { data, error } = await db.auth.signInWithPassword({ email, password });
+
+    // Если пользователь не существует — регистрируем
+    if (error && error.message.includes('Invalid login credentials')) {
+      const reg = await db.auth.signUp({ email, password: password || 'nexora2025' });
+      if (reg.error) throw reg.error;
+      data = reg.data;
+      toast('Аккаунт создан! Проверьте email для подтверждения', 'info');
+    } else if (error) {
+      throw error;
+    }
+
+    STATE.currentUser = data.user;
+
+    // Ждём немного чтобы триггер создал профиль
+    await new Promise(r => setTimeout(r, 600));
+
+    // Загружаем профиль
+    const profile = await loadMyProfile();
+    STATE.currentProfile = profile;
+
+    // Если передана роль принудительно (демо-режим) — используем её
+    const role = forcedRole || profile?.role || 'participant';
+
+    // Переходим на нужный экран
+    navigateByRole(role);
+    toast('Вход выполнен', 'success');
+
+  } catch (err) {
+    toast(err.message || 'Ошибка входа', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Войти как участник'; }
+  }
+}
+
+function navigateByRole(role) {
+  if (role === 'organizer') { goTo('organizer'); orgTab('dashboard','Dashboard'); }
+  else if (role === 'admin') { goTo('admin'); adminTab('events','All Events'); }
+  else { goTo('participant'); partTab('events','Мероприятия'); loadParticipantData(); }
+}
+
+function showRegForm() {
+  document.getElementById('reg-form').style.display = 'block';
+}
+
+// Загрузить свой профиль
+async function loadMyProfile() {
+  if (!STATE.currentUser) return null;
+  const { data } = await db.from('users').select('*').eq('id', STATE.currentUser.id).single();
+  return data;
+}
+
+// Сохранить профиль
+async function saveProfile() {
+  if (!STATE.currentUser) return;
+  const interests = Array.from(document.querySelectorAll('#interests-list .tag'))
+    .map(t => t.textContent.replace(' ✕','').trim())
+    .filter(Boolean);
+  const { error } = await db.from('users').update({
+    first_name: document.querySelector('#part-profile input[placeholder="Иван"]')?.value,
+    last_name: document.querySelector('#part-profile input[placeholder="Петров"]')?.value,
+    city: document.querySelector('#part-profile input[placeholder="Москва"]')?.value,
+    company: document.querySelector('#part-profile input[value="Nexora Corp"]')?.value,
+    job_title: document.querySelector('#part-profile input[value="CEO"]')?.value,
+    interests,
+    updated_at: new Date().toISOString()
+  }).eq('id', STATE.currentUser.id);
+  if (!error) toast('Профиль сохранён', 'success');
+  else toast('Ошибка сохранения', 'error');
+}
+
+// ─── LOAD PARTICIPANT DATA ───
+async function loadParticipantData() {
+  await Promise.all([
+    loadEvents(),
+    loadMyConnections(),
+    loadPendingRequests(),
+  ]);
+}
+
+// ─── EVENTS ───
+async function loadEvents() {
+  const { data: events } = await db
+    .from('events')
+    .select('*')
+    .eq('status', 'active')
+    .order('event_date', { ascending: true });
+
+  if (!events || !events.length) return;
+  STATE.currentEventId = events[0].id;
+
+  // Обновляем список мероприятий
+  const container = document.getElementById('part-events');
+  if (!container) return;
+  const eventsList = container.querySelector('.card[style*="border-left"]')?.parentElement;
+}
+
+// ─── ATTENDEES ───
+async function loadAttendees(eventId) {
+  const id = eventId || STATE.currentEventId;
+  if (!id) return;
+  const { data } = await db
+    .from('registrations')
+    .select('user_id, users(id, first_name, last_name, company, job_title, city, interests, qr_code)')
+    .eq('event_id', id)
+    .eq('status', 'checkedin');
+
+  if (!data) return;
+  const attendees = data.map(r => ({
+    id: r.users.id,
+    init: getInitials(r.users.first_name, r.users.last_name),
+    name: `${r.users.first_name || ''} ${r.users.last_name || ''}`.trim() || r.users.email,
+    company: r.users.company || '—',
+    role: r.users.job_title || '—',
+    city: r.users.city || '',
+    interests: r.users.interests || [],
+    connections: 0,
+  }));
+  renderAttendees(attendees);
+}
+function partTab(t,bc){
+  document.querySelectorAll('#screen-participant .tab-content').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById('part-'+t);
+  if(el) el.classList.add('active');
+  document.querySelectorAll('#p-sidebar .s-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('p-nav-'+t)?.classList.add('active');
+  document.getElementById('p-bc-text').textContent=bc||t;
+  closeSidebar('p-sidebar','p-overlay');
+}
+
+function evTab(t){
+  document.querySelectorAll('#part-event-detail .tab-content').forEach(el=>el.classList.remove('active'));
+  document.getElementById('ev-'+t)?.classList.add('active');
+  document.querySelectorAll('#part-event-detail .tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('ev-tab-'+t)?.classList.add('active');
+}
+
+// ─── ATTENDEES ───
+function renderAttendees(arr){
+  const list=document.getElementById('attendees-list');
+  if(!list) return;
+  const myIds=new Set(MY_CONNECTIONS.map(c=>c.id));
+  list.innerHTML=arr.map(a=>{
+    const isConn=myIds.has(a.id);
+    return `<div class="pc" onclick="openPanel(${a.id})">
+      <div class="pc-av">${a.init}</div>
+      <div class="pc-info">
+        <div class="pc-name">${a.name}</div>
+        <div class="pc-role">${a.company} · ${a.role} · ${a.city}</div>
+        <div class="pc-meta">${a.interests.join(' · ')}</div>
+      </div>
+      <span class="conn-pill" style="margin-right:6px">${a.connections}</span>
+      ${isConn
+        ? `<span class="badge badge-checkedin" style="flex-shrink:0">в связях</span>`
+        : `<button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="event.stopPropagation();quickAdd(${a.id})">+ Добавить</button>`
+      }
+    </div>`;
+  }).join('');
+}
+
+function filterAttendees(q){
+  const filtered=q?ATTENDEES_DATA.filter(a=>a.name.toLowerCase().includes(q.toLowerCase())||a.company.toLowerCase().includes(q.toLowerCase())):ATTENDEES_DATA;
+  renderAttendees(filtered);
+}
+
+function quickAdd(id){
+  const a=ATTENDEES_DATA.find(a=>a.id===id);
+  if(!a) return;
+  toast(`Запрос отправлен — ${a.name}`, 'success');
+}
+
+// ─── CONNECTIONS ───
+function renderConnections(arr){
+  const list=document.getElementById('connections-list');
+  if(!list) return;
+  if(!arr||!arr.length){list.innerHTML='<div class="empty-state"><div class="empty-icon">🤝</div><div>Нет связей</div></div>';return;}
+  list.innerHTML=arr.map(c=>`
+  <div class="conn-card" onclick="openPanel(${c.id})">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="pc-av large">${c.init}</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700;font-family:var(--font-display)">${c.name}</div>
+        <div style="font-size:13px;color:var(--text-muted)">${c.company} · ${c.role} · ${c.city}</div>
+        <div class="conn-event-badge">📍 Вы познакомились на: ${c.event}</div>
+        ${c.tags.length?`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px">${c.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`:''}
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-family:var(--mono);font-size:18px;font-weight:800;color:var(--accent)">${c.connections}</div>
+        <div style="font-size:10px;color:var(--text-dim);font-family:var(--mono)">СВЯЗЕЙ</div>
+      </div>
+    </div>
+  </div>`).join('');
+}
+
+function filterConnections(type, val){
+  let arr = [...MY_CONNECTIONS];
+  if(type==='name' && val) arr=arr.filter(c=>c.name.toLowerCase().includes(val.toLowerCase()));
+  if(type==='company' && val) arr=arr.filter(c=>c.company.toLowerCase().includes(val.toLowerCase()));
+  if(type==='event' && val) arr=arr.filter(c=>c.event===val);
+  renderConnections(arr);
+}
+
+// ─── PENDING ───
+function renderPending(){
+  const list=document.getElementById('pending-list');
+  if(!list) return;
+  if(!PENDING_REQUESTS.length){
+    list.innerHTML='<div class="empty-state"><div class="empty-icon">✓</div><div>Нет входящих запросов</div></div>';
+    document.getElementById('p-pending-badge').style.display='none';
+    return;
+  }
+  list.innerHTML=PENDING_REQUESTS.map(r=>`
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <div class="pc-av large" style="background:var(--yellow-light);color:var(--yellow);border-color:rgba(245,158,11,.2)">${r.init}</div>
+      <div style="flex:1">
+        <div style="font-size:15px;font-weight:700;font-family:var(--font-display)">${r.name}</div>
+        <div style="font-size:13px;color:var(--text-muted)">${r.company} · ${r.role}</div>
+        <div class="conn-event-badge">📍 ${r.event}</div>
+        <div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap">${r.interests.map(i=>`<span class="tag">${i}</span>`).join('')}</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Подтверждение обязательно. После принятия контакт появится в Моих связях.</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="acceptPending(${r.id})">✓ Принять запрос</button>
+      <button class="btn btn-danger" onclick="declinePending(${r.id})">Отклонить</button>
+    </div>
+  </div>`).join('');
+}
+
+function acceptPending(id){
+  const idx=PENDING_REQUESTS.findIndex(r=>r.id===id);
+  if(idx<0) return;
+  const r=PENDING_REQUESTS[idx];
+  const newConn={id:Date.now(),init:r.init,name:r.name,company:r.company,role:r.role,city:'Москва',event:r.event,interests:r.interests,connections:5,tags:[]};
+  MY_CONNECTIONS.push(newConn);
+  PENDING_REQUESTS.splice(idx,1);
+  // update badge
+  const badge=document.getElementById('p-conn-badge');
+  if(badge) badge.textContent=MY_CONNECTIONS.length;
+  const pbadge=document.getElementById('p-pending-badge');
+  if(pbadge) { pbadge.textContent=PENDING_REQUESTS.length||''; if(!PENDING_REQUESTS.length) pbadge.style.display='none'; }
+  const totalEl=document.getElementById('p-total-conn');
+  if(totalEl) totalEl.textContent=MY_CONNECTIONS.length;
+  renderPending();
+  toast(`${r.name} добавлен в Мои связи`, 'success');
+}
+
+function declinePending(id){
+  const idx=PENDING_REQUESTS.findIndex(r=>r.id===id);
+  if(idx>=0){ PENDING_REQUESTS.splice(idx,1); renderPending(); toast('Запрос отклонён','info'); }
+}
+
+// ─── DETAIL PANEL ───
+function openPanel(id){
+  const a=ATTENDEES_DATA.find(a=>a.id===id)||MY_CONNECTIONS.find(c=>c.id===id);
+  if(!a) return;
+  const isMyConn=MY_CONNECTIONS.some(c=>c.id===id);
+  document.getElementById('dp-av').textContent=a.init;
+  document.getElementById('dp-name').textContent=a.name;
+  document.getElementById('dp-role').textContent=`${a.company} · ${a.role}`;
+  document.getElementById('dp-city').textContent=a.city||'';
+  document.getElementById('dp-conn-count').textContent=a.connections||'—';
+  document.getElementById('dp-interests-wrap').innerHTML=(a.interests||[]).map(i=>`<span class="tag">${i}</span>`).join('');
+  const metEl=document.getElementById('dp-met');
+  if(a.event) metEl.textContent=`Вы познакомились на: ${a.event}`;
+  else metEl.textContent='';
+  const actionsEl=document.getElementById('dp-actions');
+  if(isMyConn){
+    actionsEl.innerHTML=`<button class="btn btn-ghost" style="width:100%;justify-content:center">Написать сообщение</button>`;
+  } else {
+    actionsEl.innerHTML=`<button class="btn btn-primary btn-lg" style="width:100%;justify-content:center;font-size:15px" onclick="sendConnectionRequest()">+ Добавить в Мои связи</button><button class="btn btn-ghost" style="width:100%;justify-content:center">Написать сообщение</button>`;
+  }
+  const tagsSection=document.getElementById('dp-tags-section');
+  if(isMyConn && tagsSection) tagsSection.style.display='block';
+  else if(tagsSection) tagsSection.style.display='none';
+  document.getElementById('p-detail-panel').classList.add('open');
+}
+
+function closePanel(){document.querySelectorAll('.detail-panel').forEach(p=>p.classList.remove('open'));}
+
+function sendConnectionRequest(){
+  toast('Запрос отправлен — ожидайте подтверждения','success');
+  closePanel();
+}
+
+// ─── EVENT MY CONNECTIONS ───
+function renderEvMyConnections(){
+  const el=document.getElementById('ev-my-connections');
+  if(!el) return;
+  el.innerHTML=MY_CONNECTIONS.map(c=>`
+  <div class="pc">
+    <div class="pc-av">${c.init}</div>
+    <div class="pc-info"><div class="pc-name">${c.name}</div><div class="pc-role">${c.company} · ${c.role}</div></div>
+    <button class="btn btn-ghost btn-sm">Написать</button>
+  </div>`).join('');
+}
+
+// ─── QR SCAN (PARTICIPANT) ───
+function openParticipantScan(){document.getElementById('scan-modal').classList.add('open');}
+
+const SCAN_PEOPLE=[
+  {init:'МК',name:'Мария Кузнецова',role:'Яндекс · Senior PM · Москва',interests:'AI/ML · Продукт · SaaS'},
+  {init:'ОС',name:'Ольга Смирнова',role:'Ozon · CFO · Москва',interests:'Fintech · Инвестиции'},
+  {init:'НК',name:'Никита Козлов',role:'Мегафон · Director · Москва',interests:'B2B · SaaS'},
+];
+let scanIdx=0;
+
+function simulateScan(){
+  closeModal('scan-modal');
+  const p=SCAN_PEOPLE[scanIdx%SCAN_PEOPLE.length];
+  scanIdx++;
+  document.getElementById('ps-av').textContent=p.init;
+  document.getElementById('ps-name').textContent=p.name;
+  document.getElementById('ps-role').textContent=p.role;
+  document.getElementById('ps-interests').textContent=p.interests;
+  document.getElementById('post-scan-overlay').classList.add('open');
+}
+
+function closePostScan(){document.getElementById('post-scan-overlay').classList.remove('open');}
+
+function addFromScan(){
+  const name=document.getElementById('ps-name').textContent;
+  closePostScan();
+  toast(`${name} добавлен в запросы — ожидайте подтверждения`, 'success');
+  const badge=document.getElementById('p-pending-badge');
+  if(badge){ badge.style.display=''; badge.textContent=parseInt(badge.textContent||0)+1; }
+}
+
+// ─── INTERESTS/TAGS ───
+function removeInterest(el){el.remove();}
+function addInterest(e,inp){
+  if(e.key==='Enter'&&inp.value.trim()){
+    const tag=document.createElement('span');
+    tag.className='tag removable';
+    tag.onclick=()=>tag.remove();
+    tag.textContent=inp.value.trim()+' ✕';
+    inp.parentNode.insertBefore(tag,inp);
+    inp.value='';
+  }
+}
+function removeTag(el){el.remove();}
+function addTag(e,inp){
+  if(e.key==='Enter'&&inp.value.trim()){
+    const tag=document.createElement('span');
+    tag.className='tag removable';
+    tag.onclick=()=>tag.remove();
+    tag.textContent=inp.value.trim()+' ✕';
+    inp.parentNode.insertBefore(tag,inp);
+    inp.value='';
+  }
+}
+
+// ─── ORGANIZER ───
+function orgTab(t,bc){
+  document.querySelectorAll('#screen-organizer .tab-content').forEach(el=>el.classList.remove('active'));
+  document.getElementById('org-'+t)?.classList.add('active');
+  document.querySelectorAll('#o-sidebar .s-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('o-nav-'+t)?.classList.add('active');
+  document.getElementById('o-bc-text').textContent=bc||t;
+  closeSidebar('o-sidebar','o-overlay');
+}
+
+function approveRow(btn,name){
+  const badge=btn.closest('tr').querySelector('.badge');
+  if(badge){badge.className='badge badge-approved';badge.textContent='approved';}
+  btn.textContent='Детали';btn.className='btn btn-ghost btn-sm';btn.onclick=null;
+  const b=document.getElementById('o-badge');
+  if(b) b.textContent=Math.max(0,parseInt(b.textContent)-1);
+  toast(`${name} — заявка одобрена`,'success');
+}
+
+// ─── REGS ───
+function renderRegs(data){
+  const tbody=document.getElementById('reg-tbody');
+  if(!tbody) return;
+  (data||REGS).forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="checkbox-col"><input type="checkbox" onchange="toggleRow(this,${r.id})"/></td><td><strong>${r.name}</strong><br><span style="font-size:11px;font-family:var(--mono);color:var(--text-dim)">${r.role}</span></td><td style="font-size:12px">${r.company}</td><td><span class="badge badge-${r.status}">${r.status}</span></td><td><span class="conn-pill">${r.connections}</span></td><td style="font-family:var(--mono);font-size:11px;color:var(--text-dim)">${r.date}</td><td>${r.status==='pending'?`<button class="btn btn-success btn-sm" onclick="approveReg(${r.id})">Принять</button>`:'<button class="btn btn-ghost btn-sm">Детали</button>'}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function filterRegs(q,status){
+  document.getElementById('reg-tbody').innerHTML='';
+  let arr=REGS;
+  if(q) arr=arr.filter(r=>r.name.toLowerCase().includes(q.toLowerCase())||r.company.toLowerCase().includes(q.toLowerCase()));
+  if(status) arr=arr.filter(r=>r.status===status);
+  renderRegs(arr);
+}
+
+function toggleRow(cb,id){
+  if(cb.checked) STATE.selectedRows.add(id); else STATE.selectedRows.delete(id);
+  const btn=document.getElementById('bulk-approve-btn');
+  if(btn) btn.style.display=STATE.selectedRows.size>0?'':'none';
+  const cnt=document.getElementById('sel-count');
+  if(cnt) cnt.textContent=STATE.selectedRows.size;
+}
+function selectAll(cb){
+  document.querySelectorAll('#reg-tbody input[type=checkbox]').forEach(c=>{c.checked=cb.checked;});
+  STATE.selectedRows.clear();
+  if(cb.checked) REGS.forEach(r=>STATE.selectedRows.add(r.id));
+  const btn=document.getElementById('bulk-approve-btn');
+  if(btn) btn.style.display=STATE.selectedRows.size>0?'':'none';
+}
+function bulkApprove(){toast(`${STATE.selectedRows.size} заявок одобрено`,'success');STATE.selectedRows.clear();document.getElementById('bulk-approve-btn').style.display='none';document.getElementById('reg-tbody').innerHTML='';renderRegs();}
+function approveReg(id){const r=REGS.find(r=>r.id===id);if(r){r.status='approved';toast(`${r.name} одобрен`,'success');document.getElementById('reg-tbody').innerHTML='';renderRegs();}}
+function exportCSV(){const rows=[['Имя','Компания','Роль','Статус','Connections','Дата'],...REGS.map(r=>[r.name,r.company,r.role,r.status,r.connections,r.date])];const csv=rows.map(r=>r.join(',')).join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='nexora-participants.csv';a.click();toast('CSV скачан','success');}
+
+// ─── MANUAL CHECK-IN ───
+let manualTarget=null;
+function manualSearch(q){
+  const res=document.getElementById('manual-results');
+  if(!q){res.style.display='none';return;}
+  const matches=REGS.filter(r=>r.status==='approved'&&r.name.toLowerCase().includes(q.toLowerCase()));
+  res.style.display=matches.length?'block':'none';
+  res.innerHTML=matches.map(r=>`<div class="pc" style="cursor:pointer;margin-bottom:4px" onclick="selectManual('${r.name}')"><div class="pc-info"><div class="pc-name">${r.name}</div><div class="pc-role">${r.company}</div></div><span class="badge badge-approved">approved</span></div>`).join('');
+}
+function selectManual(name){manualTarget=name;document.getElementById('manual-search').value=name;document.getElementById('manual-results').style.display='none';}
+function manualCheckin(){
+  const name=manualTarget||document.getElementById('manual-search').value;
+  if(!name) return;
+  STATE.ciCount++;
+  const el=document.getElementById('ci-count');
+  if(el){el.textContent=STATE.ciCount;el.style.transform='scale(1.15)';setTimeout(()=>el.style.transform='',300);}
+  toast(`${name} — check-in выполнен`,'success');
+  document.getElementById('manual-search').value='';
+  manualTarget=null;
+}
+
+// ─── ADMIN ───
+function adminTab(t,bc){
+  document.querySelectorAll('#screen-admin .tab-content').forEach(el=>el.classList.remove('active'));
+  document.getElementById('admin-'+t)?.classList.add('active');
+  document.querySelectorAll('#a-sidebar .s-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('a-nav-'+t)?.classList.add('active');
+  document.getElementById('a-bc-text').textContent=bc||t;
+  closeSidebar('a-sidebar','a-overlay');
+}
+function createEvent(){
+  const t=document.getElementById('ev-title').value;
+  const l=document.getElementById('ev-loc').value;
+  let ok=true;
+  ['ev-title','ev-loc'].forEach(id=>{document.getElementById(id).classList.remove('error');document.getElementById(id+'-err').classList.remove('show');});
+  if(!t){document.getElementById('ev-title').classList.add('error');document.getElementById('ev-title-err').classList.add('show');ok=false;}
+  if(!l){document.getElementById('ev-loc').classList.add('error');document.getElementById('ev-loc-err').classList.add('show');ok=false;}
+  if(!ok) return;
+  toast('Мероприятие создано','success');
+  setTimeout(()=>adminTab('events','All Events'),600);
+}
+
+// ─── ORG SCAN ───
+let scanTimeout;
+function scanResult(type){
+  clearTimeout(scanTimeout);
+  const overlay=document.getElementById('scan-overlay');
+  overlay.className='scan-result open '+(type==='ok'?'ok':'fail');
+  if(type==='ok'){
+    document.getElementById('sr-icon').textContent='✓';
+    document.getElementById('sr-title').textContent='Допущен';
+    document.getElementById('sr-sub').textContent='Анна Соколова · Сбер · CPO';
+    STATE.ciCount++;
+    const el=document.getElementById('scan-ci-count');
+    if(el){el.textContent=STATE.ciCount;el.style.transform='scale(1.2)';setTimeout(()=>el.style.transform='',300);}
+    addScanLog('Анна Соколова','Сбер','ok');
+  } else {
+    document.getElementById('sr-icon').textContent='✗';
+    document.getElementById('sr-title').textContent='Отказ';
+    document.getElementById('sr-sub').textContent='QR-код недействителен';
+    STATE.denyCount++;
+    const el=document.getElementById('scan-deny-count');
+    if(el) el.textContent=STATE.denyCount;
+    addScanLog('ID неизвестен','—','deny');
+  }
+  scanTimeout=setTimeout(()=>{document.getElementById('scan-overlay').className='scan-result';},3500);
+}
+function addScanLog(name,co,type){
+  const tbody=document.getElementById('scan-log');
+  if(!tbody) return;
+  const now=new Date();
+  const t=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td style="padding:8px 14px;font-family:var(--mono);font-size:11px;color:var(--text-dim)">${t}</td><td style="padding:8px 14px;font-size:13px"><strong>${name}</strong>${co!=='—'?`<br><span style="font-size:11px;color:var(--text-muted)">${co}</span>`:''}</td><td style="padding:8px 14px;text-align:right"><span style="color:${type==='ok'?'var(--green)':'var(--red)'};font-size:12px;font-family:var(--mono);font-weight:700">● ${type==='ok'?'OK':'DENY'}</span></td>`;
+  tr.style.animation='fadeUp .2s ease';
+  tbody.insertBefore(tr,tbody.firstChild);
+}
+
+// ─── MODAL ───
+function closeModal(id){document.getElementById(id||'confirm-modal').classList.remove('open');STATE.modalCallback=null;}
+function modalConfirm(){if(STATE.modalCallback) STATE.modalCallback();closeModal();}
+
+// ─── SIDEBAR ───
+function toggleSidebar(id,ov){document.getElementById(id).classList.toggle('open');document.getElementById(ov).classList.toggle('open');}
+function closeSidebar(id,ov){document.getElementById(id).classList.remove('open');document.getElementById(ov).classList.remove('open');}
+
+// ─── DROPDOWNS ───
+function toggleNotif(id){closeDropdowns();document.getElementById(id).classList.toggle('open');}
+function clearNotifs(id){
+  document.querySelectorAll('#'+id+' .notif-unread').forEach(el=>el.classList.remove('notif-unread'));
+  document.querySelectorAll('.t-notif-dot').forEach(d=>d.style.display='none');
+  document.getElementById(id).classList.remove('open');
+}
+function toggleAvatarMenu(id){closeDropdowns();document.getElementById(id).classList.toggle('open');}
+function closeDropdowns(){document.querySelectorAll('.notif-dropdown,.avatar-dropdown').forEach(el=>el.classList.remove('open'));}
+
+// ─── TOAST ───
+function toast(msg,type='info'){
+  const c=document.getElementById('toast-container');
+  const el=document.createElement('div');
+  el.className=`toast toast-${type}`;
+  el.innerHTML=`<span class="toast-icon">${{success:'✓',error:'✕',info:'ℹ'}[type]||'ℹ'}</span>${msg}`;
+  c.appendChild(el);
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),200);},3000);
+}
+
+// ─── EVENTS ───
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeModal('confirm-modal');closeModal('scan-modal');closePostScan();closePanel();closeDropdowns();}
+});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.notif-dropdown')&&!e.target.closest('.t-notif')) document.querySelectorAll('.notif-dropdown').forEach(el=>el.classList.remove('open'));
+  if(!e.target.closest('.avatar-dropdown')&&!e.target.closest('.t-avatar')) document.querySelectorAll('.avatar-dropdown').forEach(el=>el.classList.remove('open'));
+});
+
+// ─── INIT ───
+renderAttendees(ATTENDEES_DATA);
+renderConnections(MY_CONNECTIONS);
+renderPending();
+renderEvMyConnections();
+renderRegs();
+</script>
+</body>
+</html>
