@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NEXORA v5.4 - AUTH FIX - 2026-02-22 -->
+<!-- NEXORA v5.6 - ANON KEY - 2026-02-22 -->
 <html lang="ru">
 <head>
 <meta charset="UTF-8"/>
@@ -1228,10 +1228,10 @@ textarea.input{resize:vertical;min-height:80px}
 <script>
 // ─── SUPABASE ───
 const { createClient } = supabase;
-const db = createClient(
-  'https://tzvmmjwcmvazqqpichri.supabase.co',
-  'sb_publishable_udOwdgPEEfDqBs8-F_GlIg_dN4U9RWg'
-);
+const SUPABASE_URL = 'https://tzvmmjwcmvazqqpichri.supabase.co';
+// ВАЖНО: anon key из Supabase → Settings → API → anon public (начинается с eyJ...)
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6dm1tandjbXZhenFxcGljaHJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3NTk0OTAsImV4cCI6MjA4NzMzNTQ5MH0.9BX0e2HU8kvi08RLafTAhqrDbP6nm9leEk-CGmvz_9c';
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ─── STATE ───
 const STATE = {
