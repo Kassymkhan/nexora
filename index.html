@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- NEXORA v5.3 - ШАГ 2 - 2026-02-22 -->
+<!-- NEXORA v5.4 - AUTH FIX - 2026-02-22 -->
 <html lang="ru">
 <head>
 <meta charset="UTF-8"/>
@@ -430,8 +430,9 @@ textarea.input{resize:vertical;min-height:80px}
       </div>
       <div style="font-size:22px;font-weight:800;font-family:var(--font-display);margin-bottom:4px">Войти в платформу</div>
       <div style="font-size:13px;color:var(--text-muted);margin-bottom:24px">Введите email — роль будет определена автоматически</div>
-      <div class="ig"><label>Email<span class="req">*</span></label><input class="input" id="auth-email" type="email" value="ivan@nexora.io" placeholder="you@company.com"/></div>
-      <div class="ig" style="margin-bottom:20px"><label>Пароль<span class="req">*</span></label><input class="input" type="password" value="••••••••" placeholder="••••••••"/></div>
+      <div class="ig"><label>Email<span class="req">*</span></label><input class="input" id="auth-email" type="email" placeholder="you@company.com"/></div>
+      <div class="ig" style="margin-bottom:4px"><label>Пароль<span class="req">*</span></label><input class="input" id="auth-password" type="password" placeholder="Ваш пароль"/></div>
+      <div style="text-align:right;margin-bottom:16px"><button class="btn btn-ghost" style="font-size:12px;padding:2px 0;height:auto" onclick="doForgotPassword()">Забыл пароль →</button></div>
       <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center" onclick="doLogin('participant')">Войти как участник</button>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
         <button class="btn btn-ghost" style="justify-content:center;font-size:12px" onclick="doLogin('organizer')">Войти как организатор</button>
@@ -1289,8 +1290,8 @@ function goTo(screen) {
 // ─── AUTH ───
 async function doLogin(forcedRole) {
   const email = document.getElementById('auth-email').value.trim();
-  const passwordEl = document.querySelector('#screen-auth input[type=password]');
-  const password = passwordEl ? passwordEl.value : '';
+  const passwordEl = document.getElementById('auth-password');
+  const password = passwordEl ? passwordEl.value.trim() : '';
 
   if (!email) { toast('Введите email', 'error'); return; }
 
@@ -1340,11 +1341,21 @@ function showRegForm() {
   document.getElementById('reg-form').style.display = 'block';
 }
 
+async function doForgotPassword() {
+  const email = document.getElementById('auth-email').value.trim();
+  if (!email) { toast('Введите email для сброса пароля', 'error'); return; }
+  const { error } = await db.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.href
+  });
+  if (error) toast('Ошибка: ' + error.message, 'error');
+  else toast('Письмо со ссылкой отправлено на ' + email, 'success');
+}
+
 // ─── РЕГИСТРАЦИЯ с сохранением полей ───
 async function doRegister() {
   const email = document.getElementById('auth-email').value.trim();
-  const passwordEl = document.querySelector('#screen-auth input[type=password]');
-  const password = passwordEl?.value || 'nexora2025';
+  const passwordEl = document.getElementById('auth-password');
+  const password = passwordEl?.value.trim() || 'nexora2025';
   const firstName = document.getElementById('reg-first')?.value.trim() || '';
   const lastName  = document.getElementById('reg-last')?.value.trim() || '';
   const company   = document.getElementById('reg-company')?.value.trim() || '';
